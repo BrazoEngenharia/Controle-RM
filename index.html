@@ -1,0 +1,755 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BRAZO ENGENHARIA — Sistema de Gestão de RMs</title>
+    <style>
+        :root {
+            --bg-app: #0f172a;
+            --sidebar-bg: #1e293b;
+            --card-bg: rgba(30, 41, 59, 0.7);
+            --card-hover: rgba(30, 41, 59, 0.9);
+            --primary: #0ea5e9;
+            --primary-hover: #0284c7;
+            --accent: #d97706;
+            --success: #059669;
+            --danger: #dc2626;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --border: rgba(148, 163, 184, 0.15);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --font: 'Inter', system-ui, -apple-system, sans-serif;
+            
+            --tag-mecanica: #0ea5e9;
+            --tag-civil: #f97316;
+            --tag-eletrica: #eab308;
+            --tag-qualidade: #e11d48;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: var(--font);
+            -webkit-font-smoothing: antialiased;
+        }
+        
+        body {
+            background-color: var(--bg-app);
+            color: var(--text-main);
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .icon-svg { width: 20px; height: 20px; fill: currentColor; }
+
+        /* --- TELA DE PORTAL --- */
+        #portal-screen {
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            transition: all 0.5s ease;
+        }
+
+        .portal-header { text-align: center; margin-bottom: 50px; }
+        .portal-header h1 {
+            font-size: 2.2rem; font-weight: 700; letter-spacing: 0.05em;
+            color: #f8fafc; margin-bottom: 10px; text-transform: uppercase;
+        }
+        .portal-header p { color: var(--text-muted); font-size: 0.95rem; }
+
+        .portal-grid {
+            display: grid; grid-template-columns: repeat(2, minmax(240px, 320px));
+            gap: 20px; max-width: 700px; width: 100%;
+        }
+
+        .portal-card {
+            background: rgba(15, 23, 42, 0.4); border: 1px solid var(--border);
+            border-radius: 12px; padding: 30px 25px; text-align: center; cursor: pointer;
+            backdrop-filter: blur(10px); transition: all 0.2s ease;
+            display: flex; flex-direction: column; align-items: center; gap: 16px;
+        }
+
+        .portal-card .icon-box {
+            width: 48px; height: 48px; border-radius: 8px;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .portal-card .icon-box svg { width: 24px; height: 24px; }
+
+        .card-mec { border-top: 3px solid var(--tag-mecanica); }
+        .card-mec .icon-box { background: rgba(14, 165, 233, 0.1); color: var(--tag-mecanica); }
+        .card-civ { border-top: 3px solid var(--tag-civil); }
+        .card-civ .icon-box { background: rgba(249, 115, 22, 0.1); color: var(--tag-civil); }
+        .card-ele { border-top: 3px solid var(--tag-eletrica); }
+        .card-ele .icon-box { background: rgba(234, 179, 8, 0.1); color: var(--tag-eletrica); }
+        .card-qua { border-top: 3px solid var(--tag-qualidade); }
+        .card-qua .icon-box { background: rgba(225, 29, 72, 0.1); color: var(--tag-qualidade); }
+
+        .portal-card:hover { transform: translateY(-4px); background: rgba(30, 41, 59, 0.8); border-color: rgba(255, 255, 255, 0.2); }
+        .portal-card h3 { font-size: 1rem; font-weight: 600; color: var(--text-main); letter-spacing: 0.05em; }
+
+        .portal-footer-credits {
+            margin-top: 40px; font-size: 0.75rem; color: #64748b;
+            letter-spacing: 0.05em; font-weight: 400; text-transform: uppercase;
+        }
+
+        .master-lock {
+            position: absolute; bottom: 30px; right: 30px; cursor: pointer;
+            opacity: 0.1; transition: all 0.2s ease; display: flex;
+            align-items: center; justify-content: center; padding: 8px; border-radius: 50%;
+        }
+        .master-lock:hover { opacity: 0.8; }
+        .master-lock svg { width: 16px; height: 16px; fill: var(--text-muted); }
+
+        /* --- SIDEBAR --- */
+        .sidebar {
+            width: 260px; background-color: var(--sidebar-bg); border-right: 1px solid var(--border);
+            display: flex; flex-direction: column; justify-content: space-between; position: relative; z-index: 10;
+        }
+        .sidebar-header { padding: 25px 20px; display: flex; align-items: center; gap: 12px; }
+        .sidebar-header .logo-icon {
+            width: 32px; height: 32px; background: var(--primary);
+            border-radius: 6px; display: flex; align-items: center; justify-content: center;
+            font-weight: 700; color: #fff; font-size: 1.2rem;
+        }
+        .sidebar-header h2 { font-size: 1rem; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; }
+        
+        .sidebar-menu { display: flex; flex-direction: column; gap: 4px; padding: 0 12px; flex: 1; }
+        .nav-btn {
+            background: none; border: none; color: var(--text-muted); padding: 12px 14px; border-radius: 6px;
+            text-align: left; font-size: 0.95rem; font-weight: 500; cursor: pointer; display: flex; align-items: center; gap: 10px;
+            transition: all 0.2s ease;
+        }
+        .nav-btn svg { width: 18px; height: 18px; fill: currentColor; }
+        .nav-btn:hover { color: var(--text-main); background-color: rgba(255, 255, 255, 0.05); }
+        .nav-btn.active {
+            color: var(--text-main); background: rgba(14, 165, 233, 0.15);
+            font-weight: 600; border-left: 3px solid var(--primary); border-radius: 0 6px 6px 0;
+        }
+
+        .user-badge-sidebar {
+            margin: 10px 12px; padding: 12px; background: rgba(15, 23, 42, 0.5); border-radius: 6px;
+            font-size: 0.75rem; display: flex; align-items: center; justify-content: space-between; border: 1px solid var(--border);
+            color: var(--text-muted);
+        }
+
+        .req-alert-badge {
+            background: var(--danger); color: white; font-size: 0.7rem; padding: 2px 6px;
+            border-radius: 10px; font-weight: bold; margin-left: auto; display: none;
+        }
+
+        /* --- CONTEÚDO PRINCIPAL --- */
+        .main-content {
+            flex: 1; padding: 35px; overflow-y: auto; background: var(--bg-app);
+        }
+
+        .section { display: none; }
+        .section.active { display: block; animation: fadeIn 0.3s ease; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        .section-title { font-size: 1.5rem; font-weight: 600; letter-spacing: -0.02em; margin-bottom: 6px; }
+        .section-subtitle { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 30px; }
+
+        .kpi-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 35px; }
+        .kpi-card {
+            background: var(--sidebar-bg); padding: 20px; border-radius: 10px;
+            border: 1px solid var(--border); position: relative; display: flex; flex-direction: column; gap: 8px;
+        }
+        .kpi-card h3 { font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600; }
+        .kpi-card p { font-size: 2rem; font-weight: 700; color: var(--text-main); }
+
+        .card { background: var(--sidebar-bg); border-radius: 10px; border: 1px solid var(--border); padding: 25px; margin-bottom: 25px;}
+        .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+
+        .btn {
+            background: var(--primary); color: #fff; border: none; padding: 10px 20px;
+            border-radius: 6px; cursor: pointer; font-size: 0.85rem; font-weight: 500; display: inline-flex; align-items: center; gap: 8px;
+            transition: all 0.2s ease;
+        }
+        .btn:hover { background: var(--primary-hover); }
+        .btn-secondary { background: transparent; color: var(--text-main); border: 1px solid var(--border); }
+        .btn-secondary:hover { background: rgba(255, 255, 255, 0.05); }
+        
+        .btn-action { 
+            padding: 6px 10px; font-size: 0.75rem; border-radius: 4px; background: transparent; 
+            color: var(--text-muted); border: 1px solid var(--border); cursor: pointer; display: inline-flex; align-items: center; gap: 6px; 
+            transition: all 0.2s ease; text-decoration: none;
+        }
+        .btn-action svg { width: 14px; height: 14px; fill: currentColor; }
+        .btn-action:hover { border-color: var(--text-muted); color: var(--text-main); }
+        
+        .btn-req { color: var(--accent); border-color: rgba(217, 119, 6, 0.3); background: rgba(217, 119, 6, 0.05); }
+        .btn-req:hover { background: var(--accent); color: #fff; border-color: var(--accent); }
+        .btn-delete { color: var(--danger); border-color: rgba(220, 38, 38, 0.3); }
+        .btn-delete:hover { background: var(--danger); color: #fff; border-color: var(--danger); }
+
+        .table-responsive { overflow-x: auto; border-radius: 8px; border: 1px solid var(--border); background: var(--bg-app); }
+        table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+        th, td { padding: 14px 18px; border-bottom: 1px solid var(--border); }
+        th { background-color: rgba(15, 23, 42, 0.8); color: var(--text-muted); font-weight: 500; text-transform: uppercase; font-size: 0.7rem; letter-spacing: 0.05em; }
+        tr:last-child td { border-bottom: none; }
+        tr:hover td { background-color: rgba(255, 255, 255, 0.02); }
+
+        .cat-badge { padding: 4px 8px; border-radius: 4px; font-size: 0.7rem; font-weight: 600; text-transform: uppercase; border: 1px solid transparent; }
+        .cat-mecanica { color: var(--tag-mecanica); border-color: rgba(14, 165, 233, 0.2); background: rgba(14, 165, 233, 0.05); }
+        .cat-civil { color: var(--tag-civil); border-color: rgba(249, 115, 22, 0.2); background: rgba(249, 115, 22, 0.05); }
+        .cat-eletrica { color: var(--tag-eletrica); border-color: rgba(234, 179, 8, 0.2); background: rgba(234, 179, 8, 0.05); }
+        .cat-qualidade { color: var(--tag-qualidade); border-color: rgba(225, 29, 72, 0.2); background: rgba(225, 29, 72, 0.05); }
+
+        .status-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 6px; }
+        .status-pendente .status-dot { background-color: var(--accent); }
+        .status-oc .status-dot { background-color: var(--primary); }
+        .status-entregue .status-dot { background-color: var(--success); }
+
+        .form-container { background: rgba(15, 23, 42, 0.5); border: 1px solid var(--border); padding: 25px; border-radius: 8px; margin-bottom: 25px; }
+        .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 20px; }
+        .form-group { display: flex; flex-direction: column; }
+        .form-group label { font-size: 0.75rem; margin-bottom: 6px; color: var(--text-muted); font-weight: 500; text-transform: uppercase; }
+        .form-group input, .form-group select, .form-group textarea { padding: 10px 14px; background: rgba(15, 23, 42, 0.8); border: 1px solid var(--border); border-radius: 6px; color: var(--text-main); font-size: 0.85rem; }
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus { outline: none; border-color: var(--primary); }
+        .full-width { grid-column: 1 / -1; }
+        .form-actions { display: flex; justify-content: flex-end; gap: 10px; }
+        
+        .admin-only { display: none !important; }
+        body.admin-authenticated .admin-only { display: flex !important; }
+        body.admin-authenticated .admin-only-block { display: block !important; }
+        body.admin-authenticated .admin-only-cell { display: table-cell !important; }
+        .admin-only-block, .admin-only-cell { display: none !important; }
+        
+        .action-buttons-group { display: flex; gap: 6px; justify-content: flex-start; align-items: center;}
+        
+        .req-card { border-left: 3px solid var(--accent); background: rgba(217, 119, 6, 0.05); }
+    </style>
+</head>
+<body>
+
+    <!-- PORTAL DE ENTRADA -->
+    <div id="portal-screen">
+        <div class="portal-header">
+            <h1>BRAZO ENGENHARIA</h1>
+            <p>Selecione seu núcleo técnico para acessar o espelho de requisições</p>
+        </div>
+        
+        <div class="portal-grid">
+            <div class="portal-card card-mec" onclick="enterAsViewer('MECÂNICA')">
+                <div class="icon-box">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+                </div><h3>MECÂNICA</h3>
+            </div>
+            <div class="portal-card card-civ" onclick="enterAsViewer('CIVIL')">
+                <div class="icon-box">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18"></path><path d="M19 21v-4"></path><path d="M19 17a2 2 0 0 0-2-2H7a2 2 0 0 0-2 2v4"></path><path d="M14 15V7a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v8"></path><path d="M10 9h2"></path></svg>
+                </div><h3>CIVIL</h3>
+            </div>
+            <div class="portal-card card-ele" onclick="enterAsViewer('ELÉTRICA')">
+                <div class="icon-box">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"></path></svg>
+                </div><h3>ELÉTRICA</h3>
+            </div>
+            <div class="portal-card card-qua" onclick="enterAsViewer('QUALIDADE / SEGURANÇA')">
+                <div class="icon-box">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+                </div><h3>QUALIDADE / SEG.</h3>
+            </div>
+        </div>
+
+        <div class="portal-footer-credits">CRIADO POR: SAMUEL VITOR MOREIRA SANTOS</div>
+
+        <div class="master-lock" onclick="authenticateAdmin()" title="Acesso Restrito">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+        </div>
+    </div>
+
+    <!-- SIDEBAR -->
+    <div class="sidebar">
+        <div>
+            <div class="sidebar-header">
+                <div class="logo-icon">B</div>
+                <h2>BRAZO</h2>
+            </div>
+            <div class="user-badge-sidebar">
+                <span id="user-role-display">Acesso</span>
+                <button onclick="exitToPortal()" style="background:none; border:none; color:var(--text-muted); cursor:pointer; font-weight:500;">
+                    <svg style="width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:2;" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+                </button>
+            </div>
+            <div class="sidebar-menu">
+                <button class="nav-btn active" onclick="showSection('dashboard')">
+                    <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+                    Painel Central
+                </button>
+                <button class="nav-btn" onclick="showSection('rms')">
+                    <svg viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
+                    Espelho de RMs
+                </button>
+                <button class="nav-btn admin-only-block" id="menu-obs-btn" onclick="showSection('obs')">
+                    <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                    Relatórios & Histórico
+                </button>
+                <button class="nav-btn admin-only-block" id="menu-req-btn" onclick="showSection('solicitacoes')">
+                    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                    Alertas de Previsão <span id="req-count-badge" class="req-alert-badge">0</span>
+                </button>
+            </div>
+        </div>
+        <div class="sidebar-footer">v5.0</div>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div class="main-content">
+        
+        <!-- DASHBOARD -->
+        <div id="dashboard" class="section active">
+            <h1 class="section-title">Painel de Controle</h1>
+            <p class="section-subtitle" id="dash-context-subtitle">Indicadores operacionais</p>
+            <div class="kpi-container">
+                <div class="kpi-card"><h3>RMs Cadastradas</h3><p id="kpi-total">0</p></div>
+                <div class="kpi-card"><h3>Pendentes</h3><p id="kpi-pendente" style="color:var(--accent)">0</p></div>
+                <div class="kpi-card"><h3>OCs Emitidas</h3><p id="kpi-oc" style="color:var(--primary)">0</p></div>
+                <div class="kpi-card"><h3>Materiais Entregues</h3><p id="kpi-entregue" style="color:var(--success)">0</p></div>
+            </div>
+        </div>
+
+        <!-- LISTA DE RMS -->
+        <div id="rms" class="section">
+            <h1 class="section-title">Controle Operacional (RMs)</h1>
+            <p class="section-subtitle">Tabela de monitoramento e fluxos</p>
+            
+            <div class="card">
+                <div class="card-header">
+                    <h3 style="font-size:0.9rem; font-weight:500;" id="table-title">Registros Ativos</h3>
+                    <button class="btn admin-only" onclick="openCreateMode()">
+                        <svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                        Nova Requisição
+                    </button>
+                </div>
+
+                <!-- Formulário com Link do Drive -->
+                <div id="rm-form-container" class="form-container" style="display: none;">
+                    <form id="rm-form" onsubmit="saveRM(event)">
+                        <div class="form-grid">
+                            <div class="form-group"><label>Nº Documento RM</label><input type="text" id="rm-id" required></div>
+                            <div class="form-group">
+                                <label>Setor Demandante</label>
+                                <select id="rm-categoria" required>
+                                    <option value="MECÂNICA">MECÂNICA</option>
+                                    <option value="CIVIL">CIVIL</option>
+                                    <option value="ELÉTRICA">ELÉTRICA</option>
+                                    <option value="QUALIDADE / SEGURANÇA">QUALIDADE / SEGURANÇA</option>
+                                </select>
+                            </div>
+                            <div class="form-group"><label>Data da Emissão</label><input type="date" id="rm-data" required></div>
+                            <div class="form-group"><label>Responsável / Solicitante</label><input type="text" id="rm-solicitante" required></div>
+                            <div class="form-group">
+                                <label>Situação do Pedido</label>
+                                <select id="rm-status">
+                                    <option value="Pendente">Pendente</option>
+                                    <option value="OC Emitida">OC Emitida</option>
+                                    <option value="Entregue">Entregue</option>
+                                </select>
+                            </div>
+                            <div class="form-group"><label>Documento OC</label><input type="text" id="rm-oc"></div>
+                            <div class="form-group"><label>Comprador Atribuído</label><input type="text" id="rm-comprador"></div>
+                            <div class="form-group"><label>Deadline (Previsão)</label><input type="date" id="rm-prev"></div>
+                            
+                            <!-- Campo do Drive Modificado -->
+                            <div class="form-group full-width">
+                                <label>Link de Anexo (Google Drive / OneDrive)</label>
+                                <input type="url" id="rm-anexo-url" placeholder="Cole o link compartilhável da planilha .xlsx aqui">
+                            </div>
+                        </div>
+                        <div class="form-actions">
+                            <button type="button" class="btn btn-secondary" onclick="closeForm()">Cancelar</button>
+                            <button type="submit" class="btn" id="submit-form-btn">Salvar Diretriz</button>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Identificação</th><th>Núcleo</th><th>Emissão</th><th>Solicitante</th>
+                                <th>Status Global</th><th>OC Ref.</th><th>Previsão Logística</th><th>Anexo</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="rm-table-body"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- SOLICITAÇÕES DE PREVISÃO (ADMIN ONLY) -->
+        <div id="solicitacoes" class="section">
+            <h1 class="section-title">Alertas de Previsão</h1>
+            <p class="section-subtitle">Requisições marcadas pelas lideranças solicitando verificação de deadline de entrega</p>
+            
+            <div class="card">
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Data da Cobrança</th><th>RM Solicitada</th><th>Líder Solicitante</th><th>Ação do Admin</th>
+                            </tr>
+                        </thead>
+                        <tbody id="req-table-body"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- OBSERVAÇÕES -->
+        <div id="obs" class="section">
+            <h1 class="section-title">Auditoria de Observações</h1>
+            <p class="section-subtitle">Registro de anomalias e pareceres técnicos</p>
+            
+            <div class="card">
+                <form id="obs-form" onsubmit="saveObs(event)" class="form-container">
+                    <div class="form-grid">
+                        <div class="form-group full-width">
+                            <label>Vínculo com Documento (RM)</label>
+                            <select id="obs-rm-select" required></select>
+                        </div>
+                        <div class="form-group full-width">
+                            <label>Despacho / Parecer</label>
+                            <textarea id="obs-text" rows="3" required></textarea>
+                        </div>
+                    </div>
+                    <div class="form-actions"><button type="submit" class="btn">Gravar Parecer</button></div>
+                </form>
+
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Carimbo de Tempo</th><th>Referência</th><th>Parecer Registrado</th><th class="admin-only-cell">Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="obs-table-body"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- CONEXÃO E INTEGRAÇÃO FIREBASE REALTIME DATABASE -->
+    <!-- Note que o Storage foi removido para usar apenas o DB e manter rápido -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-app.js";
+        import { getDatabase, ref, onValue, set, push, remove } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-database.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyAqE_1g4Sf7_SLsbQJvWM7l-MNakV7LrFg",
+            authDomain: "controle-rm.firebaseapp.com",
+            projectId: "controle-rm",
+            storageBucket: "controle-rm.firebasestorage.app",
+            messagingSenderId: "607923137543",
+            appId: "1:607923137543:web:9666541a2380970e46cea2",
+            measurementId: "G-259EX0C7RN",
+            databaseURL: "https://controle-rm-default-rtdb.firebaseio.com" 
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+
+        window.rms = [];
+        window.observacoes = [];
+        window.solicitacoesPrev = [];
+
+        // ESCUTA: RMs
+        onValue(ref(db, 'rms'), (snapshot) => {
+            window.rms = [];
+            snapshot.forEach((child) => { window.rms.push({ id: child.key, ...child.val() }); });
+            if(window.updateUI) window.updateUI();
+        });
+
+        // ESCUTA: OBSERVAÇÕES
+        onValue(ref(db, 'observacoes'), (snapshot) => {
+            window.observacoes = [];
+            snapshot.forEach((child) => { window.observacoes.push({ key: child.key, ...child.val() }); });
+            window.observacoes.sort((a, b) => a.timestamp - b.timestamp);
+            if(window.updateUI) window.updateUI();
+        });
+
+        // ESCUTA: SOLICITAÇÕES DE PREVISÃO
+        onValue(ref(db, 'solicitacoes_previsao'), (snapshot) => {
+            window.solicitacoesPrev = [];
+            snapshot.forEach((child) => { window.solicitacoesPrev.push({ key: child.key, ...child.val() }); });
+            if(window.updateUI) window.updateUI();
+        });
+
+        // GRAVAÇÃO DB (Apenas dados de texto/URL, bem mais rápido)
+        window.saveRMToFirebase = async function(rmData) {
+            const rmId = rmData.id; delete rmData.id;
+            await set(ref(db, 'rms/' + rmId), rmData);
+        };
+
+        window.saveObsToFirebase = async function(obsData) {
+            await set(push(ref(db, 'observacoes')), { timestamp: Date.now(), ...obsData });
+        };
+
+        window.requestPrevisaoFirebase = async function(rmId, solicitanteCat) {
+            await set(push(ref(db, 'solicitacoes_previsao')), {
+                rmId: rmId, solicitante: solicitanteCat, timestamp: Date.now(), dateStr: new Date().toLocaleString('pt-BR')
+            });
+            alert("Aviso de cobrança enviado à administração do Almoxarifado.");
+        };
+
+        window.resolvePrevisaoFirebase = async function(reqKey) {
+            await remove(ref(db, 'solicitacoes_previsao/' + reqKey));
+        };
+
+        window.deleteRMFromFirebase = async function(rmId) {
+            if(confirm(`Tem certeza que deseja apagar permanentemente a RM ${rmId}?`)) {
+                await remove(ref(db, 'rms/' + rmId));
+                window.observacoes.filter(o => o.rmId === rmId).forEach(async obs => {
+                    await remove(ref(db, 'observacoes/' + obs.key));
+                });
+            }
+        };
+
+        window.deleteObsFromFirebase = async function(obsKey) {
+            if(confirm("Apagar parecer técnico?")) await remove(ref(db, 'observacoes/' + obsKey));
+        };
+    </script>
+
+    <script>
+        let currentRole = "VIEWER"; 
+        let currentCategoryFilter = null; 
+
+        function enterAsViewer(categoria) {
+            currentRole = "VIEWER"; currentCategoryFilter = categoria;
+            document.body.classList.remove('admin-authenticated');
+            document.getElementById('user-role-display').innerText = `Líder: ${categoria}`;
+            document.getElementById('dash-context-subtitle').innerText = `Indicadores operacionais: ${categoria}`;
+            document.getElementById('portal-screen').style.opacity = '0';
+            setTimeout(() => document.getElementById('portal-screen').style.display = 'none', 300);
+            updateUI();
+        }
+
+        function authenticateAdmin() {
+            currentRole = "ADMIN"; currentCategoryFilter = null; 
+            document.body.classList.add('admin-authenticated');
+            document.getElementById('user-role-display').innerText = "Admin: Almoxarifado";
+            document.getElementById('dash-context-subtitle').innerText = "Indicadores operacionais globais";
+            document.getElementById('portal-screen').style.opacity = '0';
+            setTimeout(() => document.getElementById('portal-screen').style.display = 'none', 300);
+            updateUI();
+        }
+
+        function exitToPortal() {
+            document.getElementById('portal-screen').style.display = 'flex';
+            setTimeout(() => document.getElementById('portal-screen').style.opacity = '1', 5);
+            closeForm(); showSection('dashboard');
+        }
+
+        function showSection(sectionId) {
+            document.querySelectorAll('.section').forEach(sec => sec.classList.remove('active'));
+            document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+            document.getElementById(sectionId).classList.add('active');
+            event.currentTarget.classList.add('active');
+            updateUI();
+        }
+
+        function openCreateMode() { document.getElementById('rm-form-container').style.display = 'block'; }
+        
+        function closeForm() { 
+            document.getElementById('rm-form-container').style.display = 'none'; 
+            document.getElementById('rm-form').reset(); 
+        }
+
+        function getCatClass(cat) {
+            if(cat === 'MECÂNICA') return 'cat-badge cat-mecanica';
+            if(cat === 'CIVIL') return 'cat-badge cat-civil';
+            if(cat === 'ELÉTRICA') return 'cat-badge cat-eletrica';
+            return 'cat-badge cat-qualidade';
+        }
+
+        function getStatusHtml(status) {
+            let cl = 'status-pendente';
+            if(status === 'OC Emitida') cl = 'status-oc';
+            if(status === 'Entregue') cl = 'status-entregue';
+            return `<span class="${cl}"><span class="status-dot"></span>${status}</span>`;
+        }
+
+        function requestPrev(rmId) {
+            if(window.requestPrevisaoFirebase) window.requestPrevisaoFirebase(rmId, currentCategoryFilter);
+        }
+
+        function resolveReq(reqKey) {
+            if(window.resolvePrevisaoFirebase) window.resolvePrevisaoFirebase(reqKey);
+        }
+
+        function saveRM(e) {
+            e.preventDefault();
+            const urlInput = document.getElementById('rm-anexo-url').value.trim();
+            
+            const rmData = {
+                id: document.getElementById('rm-id').value.trim(), categoria: document.getElementById('rm-categoria').value,
+                data: document.getElementById('rm-data').value, solicitante: document.getElementById('rm-solicitante').value.trim(),
+                status: document.getElementById('rm-status').value, oc: document.getElementById('rm-oc').value.trim() || '-',
+                comprador: document.getElementById('rm-comprador').value.trim() || '-', prev: document.getElementById('rm-prev').value || '-',
+                fileUrl: urlInput !== '' ? urlInput : null
+            };
+            
+            if(window.saveRMToFirebase) {
+                window.saveRMToFirebase(rmData).then(() => {
+                    closeForm();
+                });
+            }
+        }
+
+        function saveObs(e) {
+            e.preventDefault();
+            if(window.saveObsToFirebase) window.saveObsToFirebase({
+                date: new Date().toLocaleString('pt-BR'),
+                rmId: document.getElementById('obs-rm-select').value, text: document.getElementById('obs-text').value.trim()
+            });
+            document.getElementById('obs-form').reset();
+        }
+
+        function deleteRM(id) { if(window.deleteRMFromFirebase) window.deleteRMFromFirebase(id); }
+        function deleteObs(key) { if(window.deleteObsFromFirebase) window.deleteObsFromFirebase(key); }
+
+        window.updateUI = function() {
+            const dataPool = window.rms || [];
+            const reqPool = window.solicitacoesPrev || [];
+
+            let filteredData = dataPool;
+            if (currentRole === "VIEWER" && currentCategoryFilter) {
+                filteredData = dataPool.filter(r => r.categoria === currentCategoryFilter);
+            }
+
+            document.getElementById('kpi-total').innerText = filteredData.length;
+            document.getElementById('kpi-pendente').innerText = filteredData.filter(r => r.status === 'Pendente').length;
+            document.getElementById('kpi-oc').innerText = filteredData.filter(r => r.status === 'OC Emitida').length;
+            document.getElementById('kpi-entregue').innerText = filteredData.filter(r => r.status === 'Entregue').length;
+
+            const reqBadge = document.getElementById('req-count-badge');
+            if(currentRole === "ADMIN" && reqPool.length > 0) {
+                reqBadge.innerText = reqPool.length;
+                reqBadge.style.display = 'inline-block';
+            } else {
+                reqBadge.style.display = 'none';
+            }
+
+            // Tabela de RMs
+            const tbody = document.getElementById('rm-table-body');
+            tbody.innerHTML = '';
+            filteredData.forEach(rm => {
+                let actionButtons = '';
+                
+                if (currentRole === "ADMIN") {
+                    actionButtons = `
+                        <button class="btn-action" onclick="triggerEditRM('${rm.id}')" title="Editar Documento">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                        </button>
+                        <button class="btn-action btn-delete" onclick="deleteRM('${rm.id}')" title="Excluir Definitivamente">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                        </button>
+                    `;
+                } else if (rm.status !== 'Entregue') {
+                    actionButtons = `
+                        <button class="btn-action btn-req" onclick="requestPrev('${rm.id}')" title="Solicitar Verificação de Previsão à Administração">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                            Cobrar Previsão
+                        </button>
+                    `;
+                }
+
+                let anexoHtml = '<span style="color:var(--text-muted); opacity:0.4;">—</span>';
+                if (rm.fileUrl) {
+                    anexoHtml = `
+                        <a href="${rm.fileUrl}" target="_blank" class="btn-action" style="color:var(--primary); border-color:rgba(14, 165, 233, 0.3);" title="Abrir Link Externo">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
+                            Planilha
+                        </a>
+                    `;
+                }
+
+                tbody.innerHTML += `
+                    <tr>
+                        <td style="font-family:monospace; color:var(--text-main); font-weight:600;">${rm.id}</td>
+                        <td><span class="${getCatClass(rm.categoria)}">${rm.categoria}</span></td>
+                        <td>${rm.data.split('-').reverse().join('/')}</td>
+                        <td style="color:var(--text-main)">${rm.solicitante}</td>
+                        <td>${getStatusHtml(rm.status)}</td>
+                        <td>${rm.oc}</td>
+                        <td style="font-weight:600; color:var(--text-main);">${rm.prev !== '-' ? rm.prev.split('-').reverse().join('/') : '-'}</td>
+                        <td>${anexoHtml}</td>
+                        <td><div class="action-buttons-group">${actionButtons}</div></td>
+                    </tr>
+                `;
+            });
+
+            // Tabela de Solicitações no Admin
+            const reqTbody = document.getElementById('req-table-body');
+            if(reqTbody) {
+                reqTbody.innerHTML = '';
+                [...reqPool].reverse().forEach(req => {
+                    reqTbody.innerHTML += `
+                        <tr class="req-card">
+                            <td style="font-size:0.8rem; color:var(--text-muted)">${req.dateStr}</td>
+                            <td style="font-family:monospace; font-weight:bold; color:var(--text-main)">${req.rmId}</td>
+                            <td><span class="${getCatClass(req.solicitante)}">${req.solicitante}</span></td>
+                            <td>
+                                <button class="btn-action" style="color:var(--success); border-color:var(--success)" onclick="resolveReq('${req.key}')">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                                    Marcar como Verificado
+                                </button>
+                            </td>
+                        </tr>
+                    `;
+                });
+            }
+
+            const select = document.getElementById('obs-rm-select');
+            if(select) {
+                select.innerHTML = '<option value="">Vincular a uma RM...</option>';
+                dataPool.forEach(rm => { select.innerHTML += `<option value="${rm.id}">${rm.id} [${rm.categoria}]</option>`; });
+            }
+
+            const obsTbody = document.getElementById('obs-table-body');
+            if(obsTbody && window.observacoes) {
+                obsTbody.innerHTML = '';
+                [...window.observacoes].reverse().forEach(o => {
+                    obsTbody.innerHTML += `
+                        <tr>
+                            <td style="color: var(--text-muted); font-size: 0.8rem;">${o.date}</td>
+                            <td style="font-family:monospace; color:var(--text-main);">${o.rmId}</td>
+                            <td style="color:var(--text-muted)">${o.text}</td>
+                            <td class="admin-only-cell" style="text-align: center;">
+                                <button class="btn-action btn-delete" onclick="deleteObs('${o.key}')" title="Excluir Parecer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg></button>
+                            </td>
+                        </tr>
+                    `;
+                });
+            }
+        }
+
+        function triggerEditRM(id) {
+            const rm = (window.rms || []).find(r => r.id === id);
+            if(!rm) return;
+            openCreateMode();
+            document.getElementById('rm-id').value = rm.id; document.getElementById('rm-categoria').value = rm.categoria;
+            document.getElementById('rm-data').value = rm.data; document.getElementById('rm-solicitante').value = rm.solicitante;
+            document.getElementById('rm-status').value = rm.status; document.getElementById('rm-oc').value = rm.oc === '-' ? '' : rm.oc;
+            document.getElementById('rm-comprador').value = rm.comprador === '-' ? '' : rm.comprador; document.getElementById('rm-prev').value = rm.prev === '-' ? '' : rm.prev;
+            
+            // Recarrega a URL se houver na edição
+            document.getElementById('rm-anexo-url').value = rm.fileUrl ? rm.fileUrl : '';
+        }
+
+        window.updateUI();
+    </script>
+</body>
+</html>
