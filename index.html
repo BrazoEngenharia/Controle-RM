@@ -15,6 +15,7 @@
             --accent: #d97706;
             --success: #059669;
             --danger: #dc2626;
+            --purple: #8b5cf6;
             --text-main: #f8fafc;
             --text-muted: #94a3b8;
             --border: rgba(148, 163, 184, 0.15);
@@ -207,7 +208,16 @@
         .status-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 6px; }
         .status-pendente .status-dot { background-color: var(--accent); }
         .status-oc .status-dot { background-color: var(--primary); }
+        .status-parcial .status-dot { background-color: var(--purple); }
         .status-entregue .status-dot { background-color: var(--success); }
+        .status-parcial { color: var(--text-main); font-weight: 500; }
+        .pendencias-text { display: block; font-size: 0.7rem; color: var(--accent); margin-top: 4px; max-width: 150px; line-height: 1.2; font-weight: normal; }
+
+        /* Termômetro SLA */
+        .sla-badge { padding: 4px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: 600; display: inline-block; white-space: nowrap; }
+        .sla-ok { background: rgba(5, 150, 105, 0.1); color: var(--success); border: 1px solid rgba(5, 150, 105, 0.2); }
+        .sla-warn { background: rgba(217, 119, 6, 0.1); color: var(--accent); border: 1px solid rgba(217, 119, 6, 0.2); }
+        .sla-late { background: rgba(220, 38, 38, 0.1); color: var(--danger); border: 1px solid rgba(220, 38, 38, 0.2); }
 
         .form-container { background: rgba(15, 23, 42, 0.5); border: 1px solid var(--border); padding: 25px; border-radius: 8px; margin-bottom: 25px; }
         .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 20px; }
@@ -342,15 +352,23 @@
                             </div>
                             <div class="form-group"><label>Data da Emissão</label><input type="date" id="rm-data" required></div>
                             <div class="form-group"><label>Responsável / Solicitante</label><input type="text" id="rm-solicitante" required></div>
+                            
                             <div class="form-group">
                                 <label>Situação do Pedido</label>
-                                <select id="rm-status">
+                                <select id="rm-status" onchange="togglePendencias()">
                                     <option value="Pendente">Pendente</option>
                                     <option value="OC Emitida">OC Emitida</option>
+                                    <option value="Entregue Parcialmente">Entregue Parcialmente</option>
                                     <option value="Entregue">Entregue</option>
                                 </select>
                             </div>
                             <div class="form-group"><label>Documento OC</label><input type="text" id="rm-oc"></div>
+                            
+                            <div class="form-group full-width" id="pendencias-container" style="display: none; background: rgba(139, 92, 246, 0.1); padding: 15px; border-radius: 6px; border: 1px solid rgba(139, 92, 246, 0.2);">
+                                <label style="color: #a78bfa;">Itens Pendentes (Para Entrega Parcial)</label>
+                                <input type="text" id="rm-pendencias" placeholder="Ex: Faltam os disjuntores da WEG (Previsão: 10/11)">
+                            </div>
+
                             <div class="form-group"><label>Comprador Atribuído</label><input type="text" id="rm-comprador"></div>
                             <div class="form-group"><label>Deadline (Previsão)</label><input type="date" id="rm-prev"></div>
                             
@@ -554,6 +572,7 @@
         function closeForm() { 
             document.getElementById('rm-form-container').style.display = 'none'; 
             document.getElementById('rm-form').reset(); 
+            togglePendencias(); // Oculta o campo de pendências ao fechar
         }
 
         function getCatClass(cat) {
@@ -563,11 +582,49 @@
             return 'cat-badge cat-qualidade';
         }
 
+        // --- LÓGICA DE STATUS COM ENTREGA PARCIAL ---
         function getStatusHtml(status) {
             let cl = 'status-pendente';
             if(status === 'OC Emitida') cl = 'status-oc';
+            if(status === 'Entregue Parcialmente') cl = 'status-parcial';
             if(status === 'Entregue') cl = 'status-entregue';
             return `<span class="${cl}"><span class="status-dot"></span>${status}</span>`;
+        }
+
+        function togglePendencias() {
+            const status = document.getElementById('rm-status').value;
+            const container = document.getElementById('pendencias-container');
+            if(status === 'Entregue Parcialmente') {
+                container.style.display = 'block';
+            } else {
+                container.style.display = 'none';
+                document.getElementById('rm-pendencias').value = '';
+            }
+        }
+
+        // --- LÓGICA DE SLA / TERMÔMETRO ---
+        function getSlaHtml(prevDate, status) {
+            if(!prevDate || prevDate === '-') return '<span style="color:var(--text-muted); font-weight:600;">-</span>';
+            
+            const prevParts = prevDate.split('-');
+            const formattedDate = `${prevParts[2]}/${prevParts[1]}/${prevParts[0]}`;
+            
+            // Se já foi entregue (total), o prazo não importa mais, fica riscado
+            if(status === 'Entregue') {
+                return `<span style="color:var(--text-muted); text-decoration: line-through; font-weight:600;">${formattedDate}</span>`;
+            }
+
+            const hoje = new Date();
+            hoje.setHours(0,0,0,0);
+            const dataPrev = new Date(prevParts[0], prevParts[1] - 1, prevParts[2]);
+            dataPrev.setHours(0,0,0,0);
+            
+            const diffTime = dataPrev - hoje;
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+            if(diffDays < 0) return `<span class="sla-badge sla-late">${formattedDate} (Atrasado)</span>`;
+            if(diffDays <= 2) return `<span class="sla-badge sla-warn">${formattedDate} (Atenção)</span>`;
+            return `<span class="sla-badge sla-ok">${formattedDate} (No prazo)</span>`;
         }
 
         function requestPrev(rmId) {
@@ -587,6 +644,7 @@
                 data: document.getElementById('rm-data').value, solicitante: document.getElementById('rm-solicitante').value.trim(),
                 status: document.getElementById('rm-status').value, oc: document.getElementById('rm-oc').value.trim() || '-',
                 comprador: document.getElementById('rm-comprador').value.trim() || '-', prev: document.getElementById('rm-prev').value || '-',
+                pendencias: document.getElementById('rm-pendencias').value.trim() || '',
                 fileUrl: urlInput !== '' ? urlInput : null
             };
             
@@ -620,7 +678,7 @@
 
             document.getElementById('kpi-total').innerText = filteredData.length;
             document.getElementById('kpi-pendente').innerText = filteredData.filter(r => r.status === 'Pendente').length;
-            document.getElementById('kpi-oc').innerText = filteredData.filter(r => r.status === 'OC Emitida').length;
+            document.getElementById('kpi-oc').innerText = filteredData.filter(r => r.status === 'OC Emitida' || r.status === 'Entregue Parcialmente').length;
             document.getElementById('kpi-entregue').innerText = filteredData.filter(r => r.status === 'Entregue').length;
 
             const reqBadge = document.getElementById('req-count-badge');
@@ -665,18 +723,23 @@
                     `;
                 }
 
+                let statusColHTML = getStatusHtml(rm.status);
+                if (rm.status === 'Entregue Parcialmente' && rm.pendencias) {
+                    statusColHTML += `<span class="pendencias-text">Faltam: ${rm.pendencias}</span>`;
+                }
+
                 tbody.innerHTML += `
                     <tr>
                         <td style="font-family:monospace; color:var(--text-main); font-weight:600;">${rm.id}</td>
                         <td><span class="${getCatClass(rm.categoria)}">${rm.categoria}</span></td>
                         <td>${rm.data.split('-').reverse().join('/')}</td>
                         <td style="color:var(--text-main)">${rm.solicitante}</td>
-                        <td>${getStatusHtml(rm.status)}</td>
+                        <td>${statusColHTML}</td>
                         <td>${rm.oc}</td>
                         <td style="color:var(--text-main); font-weight:500;">
                             ${rm.comprador !== '-' && rm.comprador !== '' ? rm.comprador : '<span style="color:var(--text-muted); opacity:0.5; font-weight:400;">Não atribuído</span>'}
                         </td>
-                        <td style="font-weight:600; color:var(--text-main);">${rm.prev !== '-' ? rm.prev.split('-').reverse().join('/') : '-'}</td>
+                        <td>${getSlaHtml(rm.prev, rm.status)}</td>
                         <td>${anexoHtml}</td>
                         <td><div class="action-buttons-group">${actionButtons}</div></td>
                     </tr>
@@ -737,7 +800,9 @@
             document.getElementById('rm-status').value = rm.status; document.getElementById('rm-oc').value = rm.oc === '-' ? '' : rm.oc;
             document.getElementById('rm-comprador').value = rm.comprador === '-' ? '' : rm.comprador; document.getElementById('rm-prev').value = rm.prev === '-' ? '' : rm.prev;
             
-            // Recarrega a URL se houver na edição
+            document.getElementById('rm-pendencias').value = rm.pendencias || '';
+            togglePendencias(); 
+
             document.getElementById('rm-anexo-url').value = rm.fileUrl ? rm.fileUrl : '';
         }
 
