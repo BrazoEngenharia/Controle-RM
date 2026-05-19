@@ -219,6 +219,9 @@
         .sla-warn { background: rgba(217, 119, 6, 0.1); color: var(--accent); border: 1px solid rgba(217, 119, 6, 0.2); }
         .sla-late { background: rgba(220, 38, 38, 0.1); color: var(--danger); border: 1px solid rgba(220, 38, 38, 0.2); }
 
+        /* Bot de automação tag */
+        .bot-tag { display: inline-flex; align-items: center; gap: 6px; font-size: 0.75rem; color: #10b981; background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.2); padding: 2px 8px; border-radius: 12px; font-weight: 600; }
+
         .form-container { background: rgba(15, 23, 42, 0.5); border: 1px solid var(--border); padding: 25px; border-radius: 8px; margin-bottom: 25px; }
         .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 20px; }
         .form-group { display: flex; flex-direction: column; }
@@ -308,7 +311,7 @@
                 </button>
             </div>
         </div>
-        <div class="sidebar-footer">v5.0</div>
+        <div class="sidebar-footer">v5.1 (AI Auto-Sync)</div>
     </div>
 
     <div class="main-content">
@@ -352,7 +355,6 @@
                             </div>
                             <div class="form-group"><label>Data da Emissão</label><input type="date" id="rm-data" required></div>
                             <div class="form-group"><label>Responsável / Solicitante</label><input type="text" id="rm-solicitante" required></div>
-                            
                             <div class="form-group">
                                 <label>Situação do Pedido</label>
                                 <select id="rm-status" onchange="togglePendencias()">
@@ -363,7 +365,7 @@
                                 </select>
                             </div>
                             <div class="form-group"><label>Documento OC</label><input type="text" id="rm-oc"></div>
-                            
+
                             <div class="form-group full-width" id="pendencias-container" style="display: none; background: rgba(139, 92, 246, 0.1); padding: 15px; border-radius: 6px; border: 1px solid rgba(139, 92, 246, 0.2);">
                                 <label style="color: #a78bfa;">Itens Pendentes (Para Entrega Parcial)</label>
                                 <input type="text" id="rm-pendencias" placeholder="Ex: Faltam os disjuntores da WEG (Previsão: 10/11)">
@@ -389,7 +391,7 @@
                         <thead>
                             <tr>
                                 <th>Identificação</th><th>Núcleo</th><th>Emissão</th><th>Solicitante</th>
-                                <th>Status Global</th><th>OC Ref.</th><th>Comprador</th><th>Previsão Logística</th><th>Anexo</th>
+                                <th>Status Global</th><th>OC Ref.</th><th>Comprador / Automação</th><th>Previsão Logística</th><th>Anexo</th>
                                 <th>Ações</th>
                             </tr>
                         </thead>
@@ -572,7 +574,7 @@
         function closeForm() { 
             document.getElementById('rm-form-container').style.display = 'none'; 
             document.getElementById('rm-form').reset(); 
-            togglePendencias(); // Oculta o campo de pendências ao fechar
+            togglePendencias();
         }
 
         function getCatClass(cat) {
@@ -582,7 +584,6 @@
             return 'cat-badge cat-qualidade';
         }
 
-        // --- LÓGICA DE STATUS COM ENTREGA PARCIAL ---
         function getStatusHtml(status) {
             let cl = 'status-pendente';
             if(status === 'OC Emitida') cl = 'status-oc';
@@ -602,18 +603,12 @@
             }
         }
 
-        // --- LÓGICA DE SLA / TERMÔMETRO ---
         function getSlaHtml(prevDate, status) {
             if(!prevDate || prevDate === '-') return '<span style="color:var(--text-muted); font-weight:600;">-</span>';
-            
             const prevParts = prevDate.split('-');
             const formattedDate = `${prevParts[2]}/${prevParts[1]}/${prevParts[0]}`;
+            if(status === 'Entregue') return `<span style="color:var(--text-muted); text-decoration: line-through; font-weight:600;">${formattedDate}</span>`;
             
-            // Se já foi entregue (total), o prazo não importa mais, fica riscado
-            if(status === 'Entregue') {
-                return `<span style="color:var(--text-muted); text-decoration: line-through; font-weight:600;">${formattedDate}</span>`;
-            }
-
             const hoje = new Date();
             hoje.setHours(0,0,0,0);
             const dataPrev = new Date(prevParts[0], prevParts[1] - 1, prevParts[2]);
@@ -728,6 +723,14 @@
                     statusColHTML += `<span class="pendencias-text">Faltam: ${rm.pendencias}</span>`;
                 }
 
+                // LÓGICA DE INTELIGÊNCIA DO COMPRADOR VS IA AUTOMÁTICA
+                let compradorUI = '<span style="color:var(--text-muted); opacity:0.5; font-weight:400;">Não atribuído</span>';
+                if (rm.comprador !== '-' && rm.comprador !== '') {
+                    compradorUI = rm.comprador;
+                } else if (rm.oc !== '-' && rm.oc !== '') {
+                    compradorUI = `<span class="bot-tag" title="Atualizado por IA via E-mail"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="10" rx="2"></rect><circle cx="12" cy="5" r="2"></circle><path d="M12 7v4"></path><line x1="8" y1="16" x2="8" y2="16"></line><line x1="16" y1="16" x2="16" y2="16"></line></svg> Automação IA</span>`;
+                }
+
                 tbody.innerHTML += `
                     <tr>
                         <td style="font-family:monospace; color:var(--text-main); font-weight:600;">${rm.id}</td>
@@ -736,9 +739,7 @@
                         <td style="color:var(--text-main)">${rm.solicitante}</td>
                         <td>${statusColHTML}</td>
                         <td>${rm.oc}</td>
-                        <td style="color:var(--text-main); font-weight:500;">
-                            ${rm.comprador !== '-' && rm.comprador !== '' ? rm.comprador : '<span style="color:var(--text-muted); opacity:0.5; font-weight:400;">Não atribuído</span>'}
-                        </td>
+                        <td style="color:var(--text-main); font-weight:500;">${compradorUI}</td>
                         <td>${getSlaHtml(rm.prev, rm.status)}</td>
                         <td>${anexoHtml}</td>
                         <td><div class="action-buttons-group">${actionButtons}</div></td>
@@ -801,7 +802,7 @@
             document.getElementById('rm-comprador').value = rm.comprador === '-' ? '' : rm.comprador; document.getElementById('rm-prev').value = rm.prev === '-' ? '' : rm.prev;
             
             document.getElementById('rm-pendencias').value = rm.pendencias || '';
-            togglePendencias(); 
+            togglePendencias();
 
             document.getElementById('rm-anexo-url').value = rm.fileUrl ? rm.fileUrl : '';
         }
