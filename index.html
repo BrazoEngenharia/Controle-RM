@@ -191,6 +191,8 @@
         .btn-req:hover { background: var(--accent); color: #fff; border-color: var(--accent); }
         .btn-delete { color: var(--danger); border-color: rgba(220, 38, 38, 0.3); }
         .btn-delete:hover { background: var(--danger); color: #fff; border-color: var(--danger); }
+        .btn-sync { color: #10b981; border-color: rgba(16, 185, 129, 0.3); }
+        .btn-sync:hover { background: #10b981; color: #fff; border-color: #10b981; }
 
         .table-responsive { overflow-x: auto; border-radius: 8px; border: 1px solid var(--border); background: var(--bg-app); }
         table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
@@ -311,7 +313,7 @@
                 </button>
             </div>
         </div>
-        <div class="sidebar-footer">v5.1 (AI Auto-Sync)</div>
+        <div class="sidebar-footer">v6.0 (AI Auto-Sync + Descrições)</div>
     </div>
 
     <div class="main-content">
@@ -334,16 +336,23 @@
             <div class="card">
                 <div class="card-header">
                     <h3 style="font-size:0.9rem; font-weight:500;" id="table-title">Registros Ativos</h3>
-                    <button class="btn admin-only" onclick="openCreateMode()">
-                        <svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-                        Nova Requisição
-                    </button>
+                    <div style="display: flex; gap: 10px;">
+                        <button class="btn btn-secondary admin-only btn-sync" onclick="syncInitialData()">
+                            <svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 2v6h-6"></path><path d="M3 12a9 9 0 0 1 15-6.7L21 8"></path><path d="M3 22v-6h6"></path><path d="M21 12a9 9 0 0 1-15 6.7L3 16"></path></svg>
+                            Sincronizar RMs Antigas
+                        </button>
+                        <button class="btn admin-only" onclick="openCreateMode()">
+                            <svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                            Nova Requisição
+                        </button>
+                    </div>
                 </div>
 
                 <div id="rm-form-container" class="form-container" style="display: none;">
                     <form id="rm-form" onsubmit="saveRM(event)">
                         <div class="form-grid">
                             <div class="form-group"><label>Nº Documento RM</label><input type="text" id="rm-id" required></div>
+                            <div class="form-group full-width"><label>Descrição da RM</label><input type="text" id="rm-descricao" placeholder="Ex: TUBULAÇÃO PRÉDIO INFL" required></div>
                             <div class="form-group">
                                 <label>Setor Demandante</label>
                                 <select id="rm-categoria" required>
@@ -375,8 +384,8 @@
                             <div class="form-group"><label>Deadline (Previsão)</label><input type="date" id="rm-prev"></div>
                             
                             <div class="form-group full-width">
-                                <label>Link de Anexo (Google Drive / OneDrive)</label>
-                                <input type="url" id="rm-anexo-url" placeholder="Cole o link compartilhável da planilha .xlsx aqui">
+                                <label>Link de Anexo (Google Drive / OneDrive / Nome do Arquivo)</label>
+                                <input type="text" id="rm-anexo-url" placeholder="Insira o link ou o nome da planilha .xlsx aqui">
                             </div>
                         </div>
                         <div class="form-actions">
@@ -390,9 +399,9 @@
                     <table>
                         <thead>
                             <tr>
-                                <th>Identificação</th><th>Núcleo</th><th>Emissão</th><th>Solicitante</th>
+                                <th>Identificação</th><th>Descrição</th><th>Núcleo</th><th>Emissão</th><th>Solicitante</th>
                                 <th>Status Global</th><th>OC Ref.</th><th>Comprador / Automação</th><th>Previsão Logística</th><th>Anexo</th>
-                                <th>Ações</th>
+                                <th class="admin-only-cell">Ações</th>
                             </tr>
                         </thead>
                         <tbody id="rm-table-body"></tbody>
@@ -581,7 +590,8 @@
             if(cat === 'MECÂNICA') return 'cat-badge cat-mecanica';
             if(cat === 'CIVIL') return 'cat-badge cat-civil';
             if(cat === 'ELÉTRICA') return 'cat-badge cat-eletrica';
-            return 'cat-badge cat-qualidade';
+            if(cat === 'QUALIDADE / SEGURANÇA') return 'cat-badge cat-qualidade';
+            return 'cat-badge'; // fallback seguro
         }
 
         function getStatusHtml(status) {
@@ -606,6 +616,9 @@
         function getSlaHtml(prevDate, status) {
             if(!prevDate || prevDate === '-') return '<span style="color:var(--text-muted); font-weight:600;">-</span>';
             const prevParts = prevDate.split('-');
+            
+            if (prevParts.length < 3) return `<span style="color:var(--text-muted); font-weight:600;">${prevDate}</span>`;
+            
             const formattedDate = `${prevParts[2]}/${prevParts[1]}/${prevParts[0]}`;
             if(status === 'Entregue') return `<span style="color:var(--text-muted); text-decoration: line-through; font-weight:600;">${formattedDate}</span>`;
             
@@ -635,10 +648,15 @@
             const urlInput = document.getElementById('rm-anexo-url').value.trim();
             
             const rmData = {
-                id: document.getElementById('rm-id').value.trim(), categoria: document.getElementById('rm-categoria').value,
-                data: document.getElementById('rm-data').value, solicitante: document.getElementById('rm-solicitante').value.trim(),
-                status: document.getElementById('rm-status').value, oc: document.getElementById('rm-oc').value.trim() || '-',
-                comprador: document.getElementById('rm-comprador').value.trim() || '-', prev: document.getElementById('rm-prev').value || '-',
+                id: document.getElementById('rm-id').value.trim(),
+                descricao: document.getElementById('rm-descricao').value.trim(), 
+                categoria: document.getElementById('rm-categoria').value,
+                data: document.getElementById('rm-data').value, 
+                solicitante: document.getElementById('rm-solicitante').value.trim(),
+                status: document.getElementById('rm-status').value, 
+                oc: document.getElementById('rm-oc').value.trim() || '-',
+                comprador: document.getElementById('rm-comprador').value.trim() || '-', 
+                prev: document.getElementById('rm-prev').value || '-',
                 pendencias: document.getElementById('rm-pendencias').value.trim() || '',
                 fileUrl: urlInput !== '' ? urlInput : null
             };
@@ -672,7 +690,7 @@
             }
 
             document.getElementById('kpi-total').innerText = filteredData.length;
-            document.getElementById('kpi-pendente').innerText = filteredData.filter(r => r.status === 'Pendente').length;
+            document.getElementById('kpi-pendente').innerText = filteredData.filter(r => (r.status || 'Pendente') === 'Pendente').length;
             document.getElementById('kpi-oc').innerText = filteredData.filter(r => r.status === 'OC Emitida' || r.status === 'Entregue Parcialmente').length;
             document.getElementById('kpi-entregue').innerText = filteredData.filter(r => r.status === 'Entregue').length;
 
@@ -684,12 +702,28 @@
                 reqBadge.style.display = 'none';
             }
 
-            // Tabela de RMs
             const tbody = document.getElementById('rm-table-body');
             tbody.innerHTML = '';
             filteredData.forEach(rm => {
-                let actionButtons = '';
+                const descricao = rm.descricao || '—';
+                const categoria = rm.categoria || 'NÃO DEFINIDA';
+                const solicitante = rm.solicitante || '—';
+                const status = rm.status || 'Pendente';
+                const oc = rm.oc || '—';
+                const comprador = rm.comprador || '';
+                const prev = rm.prev || '-';
+                const pendencias = rm.pendencias || '';
                 
+                let dataEmissao = '—';
+                if (rm.data) {
+                    if (rm.data.includes('-')) {
+                        dataEmissao = rm.data.split('-').reverse().join('/');
+                    } else {
+                        dataEmissao = rm.data;
+                    }
+                }
+
+                let actionButtons = '';
                 if (currentRole === "ADMIN") {
                     actionButtons = `
                         <button class="btn-action" onclick="triggerEditRM('${rm.id}')" title="Editar Documento">
@@ -699,7 +733,7 @@
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
                         </button>
                     `;
-                } else if (rm.status !== 'Entregue') {
+                } else if (status !== 'Entregue') {
                     actionButtons = `
                         <button class="btn-action btn-req" onclick="requestPrev('${rm.id}')" title="Solicitar Verificação de Previsão à Administração">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
@@ -710,44 +744,44 @@
 
                 let anexoHtml = '<span style="color:var(--text-muted); opacity:0.4;">—</span>';
                 if (rm.fileUrl) {
+                    let href = rm.fileUrl.startsWith('http') ? rm.fileUrl : '#';
                     anexoHtml = `
-                        <a href="${rm.fileUrl}" target="_blank" class="btn-action" style="color:var(--primary); border-color:rgba(14, 165, 233, 0.3);" title="Abrir Link Externo">
+                        <a href="${href}" target="_blank" class="btn-action" style="color:var(--primary); border-color:rgba(14, 165, 233, 0.3);" title="${rm.fileUrl}">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
                             Planilha
                         </a>
                     `;
                 }
 
-                let statusColHTML = getStatusHtml(rm.status);
-                if (rm.status === 'Entregue Parcialmente' && rm.pendencias) {
-                    statusColHTML += `<span class="pendencias-text">Faltam: ${rm.pendencias}</span>`;
+                let statusColHTML = getStatusHtml(status);
+                if (status === 'Entregue Parcialmente' && pendencias) {
+                    statusColHTML += `<span class="pendencias-text">Faltam: ${pendencias}</span>`;
                 }
 
-                // LÓGICA DE INTELIGÊNCIA DO COMPRADOR VS IA AUTOMÁTICA
                 let compradorUI = '<span style="color:var(--text-muted); opacity:0.5; font-weight:400;">Não atribuído</span>';
-                if (rm.comprador !== '-' && rm.comprador !== '') {
-                    compradorUI = rm.comprador;
-                } else if (rm.oc !== '-' && rm.oc !== '') {
+                if (comprador !== '-' && comprador !== '') {
+                    compradorUI = comprador;
+                } else if (oc !== '-' && oc !== '—' && oc !== '') {
                     compradorUI = `<span class="bot-tag" title="Atualizado por IA via E-mail"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="10" rx="2"></rect><circle cx="12" cy="5" r="2"></circle><path d="M12 7v4"></path><line x1="8" y1="16" x2="8" y2="16"></line><line x1="16" y1="16" x2="16" y2="16"></line></svg> Automação IA</span>`;
                 }
 
                 tbody.innerHTML += `
                     <tr>
                         <td style="font-family:monospace; color:var(--text-main); font-weight:600;">${rm.id}</td>
-                        <td><span class="${getCatClass(rm.categoria)}">${rm.categoria}</span></td>
-                        <td>${rm.data.split('-').reverse().join('/')}</td>
-                        <td style="color:var(--text-main)">${rm.solicitante}</td>
+                        <td><strong style="color:var(--text-main);">${descricao}</strong></td>
+                        <td><span class="${getCatClass(categoria)}">${categoria}</span></td>
+                        <td>${dataEmissao}</td>
+                        <td style="color:var(--text-main)">${solicitante}</td>
                         <td>${statusColHTML}</td>
-                        <td>${rm.oc}</td>
+                        <td>${oc}</td>
                         <td style="color:var(--text-main); font-weight:500;">${compradorUI}</td>
-                        <td>${getSlaHtml(rm.prev, rm.status)}</td>
+                        <td>${getSlaHtml(prev, status)}</td>
                         <td>${anexoHtml}</td>
-                        <td><div class="action-buttons-group">${actionButtons}</div></td>
+                        <td class="admin-only-cell"><div class="action-buttons-group">${actionButtons}</div></td>
                     </tr>
                 `;
             });
 
-            // Tabela de Solicitações no Admin
             const reqTbody = document.getElementById('req-table-body');
             if(reqTbody) {
                 reqTbody.innerHTML = '';
@@ -771,7 +805,7 @@
             const select = document.getElementById('obs-rm-select');
             if(select) {
                 select.innerHTML = '<option value="">Vincular a uma RM...</option>';
-                dataPool.forEach(rm => { select.innerHTML += `<option value="${rm.id}">${rm.id} [${rm.categoria}]</option>`; });
+                dataPool.forEach(rm => { select.innerHTML += `<option value="${rm.id}">${rm.id} [${rm.categoria || 'N/A'}]</option>`; });
             }
 
             const obsTbody = document.getElementById('obs-table-body');
@@ -796,15 +830,63 @@
             const rm = (window.rms || []).find(r => r.id === id);
             if(!rm) return;
             openCreateMode();
-            document.getElementById('rm-id').value = rm.id; document.getElementById('rm-categoria').value = rm.categoria;
-            document.getElementById('rm-data').value = rm.data; document.getElementById('rm-solicitante').value = rm.solicitante;
-            document.getElementById('rm-status').value = rm.status; document.getElementById('rm-oc').value = rm.oc === '-' ? '' : rm.oc;
-            document.getElementById('rm-comprador').value = rm.comprador === '-' ? '' : rm.comprador; document.getElementById('rm-prev').value = rm.prev === '-' ? '' : rm.prev;
+            document.getElementById('rm-id').value = rm.id; 
+            document.getElementById('rm-descricao').value = rm.descricao || '';
+            document.getElementById('rm-categoria').value = rm.categoria || 'MECÂNICA';
+            document.getElementById('rm-data').value = rm.data || ''; 
+            document.getElementById('rm-solicitante').value = rm.solicitante || '';
+            document.getElementById('rm-status').value = rm.status || 'Pendente'; 
+            document.getElementById('rm-oc').value = (!rm.oc || rm.oc === '-' || rm.oc === '—') ? '' : rm.oc;
+            document.getElementById('rm-comprador').value = (!rm.comprador || rm.comprador === '-') ? '' : rm.comprador; 
+            document.getElementById('rm-prev').value = (!rm.prev || rm.prev === '-') ? '' : rm.prev;
             
             document.getElementById('rm-pendencias').value = rm.pendencias || '';
             togglePendencias();
 
             document.getElementById('rm-anexo-url').value = rm.fileUrl ? rm.fileUrl : '';
+        }
+
+        // Lógica de sincronização para RMs antigas (Planilhas informadas)
+        window.syncInitialData = async function() {
+            const hoje = new Date().toISOString().split('T')[0];
+            const initialRMs = [
+                { id: "337", descricao: "TUBULAÇÃO PRÉDIO INFL", categoria: "CIVIL", solicitante: "Thiago", status: "Pendente", fileUrl: "OBR SOLVENTUM – Requisição de Materiais 337 - TUBULAÇÃO PRÉDIO INFL.xlsx", data: hoje, oc: "-", comprador: "-", prev: "-" },
+                { id: "336", descricao: "ANDAIMES", categoria: "CIVIL", solicitante: "Thiago", status: "Pendente", fileUrl: "OBR SOLVENTUM – Requisição de Materiais 336 - ANDAIMES .xlsx", data: hoje, oc: "-", comprador: "-", prev: "-" },
+                { id: "334", descricao: "Ferramentas Civil", categoria: "CIVIL", solicitante: "Thiago", status: "Pendente", fileUrl: "OBR SOLVENTUM – Requisição de Materiais 334- Ferramentas Civil.xlsx", data: hoje, oc: "-", comprador: "-", prev: "-" },
+                { id: "332", descricao: "ESTOQUE E APLICAÇÃO", categoria: "CIVIL", solicitante: "Thiago", status: "Pendente", fileUrl: "OBR SOLVENTUM REQUISIÇÃO DE MATERIAIS 332 - ESTOQUE E APLICAÇÃO .xlsx", data: hoje, oc: "-", comprador: "-", prev: "-" },
+                { id: "331", descricao: "COMPOUD", categoria: "CIVIL", solicitante: "Thiago", status: "Pendente", fileUrl: "OBR SOLVENTUM REQUISIÇÃO DE MATERIAIS 331- COMPOUD.xlsx", data: hoje, oc: "-", comprador: "-", prev: "-" },
+                { id: "328", descricao: "GRAUTE EMERGENCIAL", categoria: "CIVIL", solicitante: "Thiago", status: "Pendente", fileUrl: "OBR SOLVENTUM – Requisição de Materiais 328 - GRAUTE EMERGENCIAL.xlsx", data: hoje, oc: "-", comprador: "-", prev: "-" },
+                { id: "325", descricao: "MADEIRITE NAVAL", categoria: "CIVIL", solicitante: "Thiago", status: "Pendente", fileUrl: "Cópia de OBRA SOLVENTUM - Requisição de Materiais - RM 325 - MADEIRITE NAVAL.xlsx", data: hoje, oc: "-", comprador: "-", prev: "-" },
+                { id: "324", descricao: "ALUGUEL DE BOBCAT - ADM", categoria: "CIVIL", solicitante: "Thiago", status: "Pendente", fileUrl: "Cópia de OBRA SOLVENTUM - Requisição de Materiais - RM 324 - ALUGUEL DE BOBCAT - ADM.xlsx", data: hoje, oc: "-", comprador: "-", prev: "-" },
+                { id: "323", descricao: "MATERIAL PARA ESGOTO INDUSTRIAL ÁREA NORTE", categoria: "CIVIL", solicitante: "Thiago", status: "Pendente", fileUrl: "Cópia de OBRA SOLVENTUM - Requisição de Materiais - RM 323 - MATERIAL PARA ESGOTO INDUSTRIAL ÁREA NORTE.xlsx", data: hoje, oc: "-", comprador: "-", prev: "-" }
+            ];
+
+            if(!confirm("Deseja sincronizar as antigas planilhas para o Banco de Dados?\nIsso atualizará RMs que não possuem anexo e criará as faltantes.")) return;
+
+            let alteracoes = 0;
+
+            for (const item of initialRMs) {
+                const existingRM = window.rms.find(r => r.id === item.id);
+                if (!existingRM) {
+                    await window.saveRMToFirebase({ ...item, id: item.id }); // Salva garantindo a estrutura
+                    alteracoes++;
+                } else {
+                    let changed = false;
+                    if (!existingRM.fileUrl) {
+                        existingRM.fileUrl = item.fileUrl;
+                        changed = true;
+                    }
+                    if (!existingRM.descricao) {
+                        existingRM.descricao = item.descricao;
+                        changed = true;
+                    }
+                    if (changed) {
+                        await window.saveRMToFirebase(existingRM);
+                        alteracoes++;
+                    }
+                }
+            }
+            alert(`Sincronização concluída! ${alteracoes} RMs foram criadas ou atualizadas.`);
         }
 
         window.updateUI();
