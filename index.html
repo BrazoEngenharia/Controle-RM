@@ -191,6 +191,8 @@
         .btn-req:hover { background: var(--accent); color: #fff; border-color: var(--accent); }
         .btn-delete { color: var(--danger); border-color: rgba(220, 38, 38, 0.3); }
         .btn-delete:hover { background: var(--danger); color: #fff; border-color: var(--danger); }
+        .btn-sync { color: #10b981; border-color: rgba(16, 185, 129, 0.3); }
+        .btn-sync:hover { background: #10b981; color: #fff; border-color: #10b981; }
 
         .table-responsive { overflow-x: auto; border-radius: 8px; border: 1px solid var(--border); background: var(--bg-app); }
         table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
@@ -311,7 +313,7 @@
                 </button>
             </div>
         </div>
-        <div class="sidebar-footer">v5.1 (AI Auto-Sync)</div>
+        <div class="sidebar-footer">v6.3 (Edição Blindada)</div>
     </div>
 
     <div class="main-content">
@@ -334,16 +336,24 @@
             <div class="card">
                 <div class="card-header">
                     <h3 style="font-size:0.9rem; font-weight:500;" id="table-title">Registros Ativos</h3>
-                    <button class="btn admin-only" onclick="openCreateMode()">
-                        <svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-                        Nova Requisição
-                    </button>
+                    <div style="display: flex; gap: 10px;">
+                        <button class="btn btn-secondary admin-only btn-sync" onclick="syncInitialData()">
+                            <svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 2v6h-6"></path><path d="M3 12a9 9 0 0 1 15-6.7L21 8"></path><path d="M3 22v-6h6"></path><path d="M21 12a9 9 0 0 1-15 6.7L3 16"></path></svg>
+                            Sincronizar RMs Antigas
+                        </button>
+                        <button class="btn admin-only" onclick="openCreateMode()">
+                            <svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                            Nova Requisição
+                        </button>
+                    </div>
                 </div>
 
                 <div id="rm-form-container" class="form-container" style="display: none;">
                     <form id="rm-form" onsubmit="saveRM(event)">
                         <div class="form-grid">
                             <div class="form-group"><label>Nº Documento RM</label><input type="text" id="rm-id" required></div>
+                            <div class="form-group full-width"><label>Descrição da RM</label><input type="text" id="rm-descricao" placeholder="Ex: TUBULAÇÃO PRÉDIO INFL"></div>
+                            
                             <div class="form-group">
                                 <label>Setor Demandante</label>
                                 <select id="rm-categoria" required>
@@ -353,8 +363,8 @@
                                     <option value="QUALIDADE / SEGURANÇA">QUALIDADE / SEGURANÇA</option>
                                 </select>
                             </div>
-                            <div class="form-group"><label>Data da Emissão</label><input type="date" id="rm-data" required></div>
-                            <div class="form-group"><label>Responsável / Solicitante</label><input type="text" id="rm-solicitante" required></div>
+                            <div class="form-group"><label>Data da Emissão</label><input type="date" id="rm-data"></div>
+                            <div class="form-group"><label>Responsável / Solicitante</label><input type="text" id="rm-solicitante"></div>
                             <div class="form-group">
                                 <label>Situação do Pedido</label>
                                 <select id="rm-status" onchange="togglePendencias()">
@@ -375,8 +385,8 @@
                             <div class="form-group"><label>Deadline (Previsão)</label><input type="date" id="rm-prev"></div>
                             
                             <div class="form-group full-width">
-                                <label>Link de Anexo (Google Drive / OneDrive)</label>
-                                <input type="url" id="rm-anexo-url" placeholder="Cole o link compartilhável da planilha .xlsx aqui">
+                                <label>Link de Anexo (Google Drive / OneDrive / Nome do Arquivo)</label>
+                                <input type="text" id="rm-anexo-url" placeholder="Insira o link ou o nome da planilha .xlsx aqui">
                             </div>
                         </div>
                         <div class="form-actions">
@@ -390,7 +400,7 @@
                     <table>
                         <thead>
                             <tr>
-                                <th>Identificação</th><th>Núcleo</th><th>Emissão</th><th>Solicitante</th>
+                                <th>Identificação</th><th>Descrição</th><th>Núcleo</th><th>Emissão</th><th>Solicitante</th>
                                 <th>Status Global</th><th>OC Ref.</th><th>Comprador / Automação</th><th>Previsão Logística</th><th>Anexo</th>
                                 <th class="admin-only-cell">Ações</th>
                             </tr>
@@ -474,14 +484,12 @@
         window.observacoes = [];
         window.solicitacoesPrev = [];
 
-        // ESCUTA: RMs
         onValue(ref(db, 'rms'), (snapshot) => {
             window.rms = [];
             snapshot.forEach((child) => { window.rms.push({ id: child.key, ...child.val() }); });
             if(window.updateUI) window.updateUI();
         });
 
-        // ESCUTA: OBSERVAÇÕES
         onValue(ref(db, 'observacoes'), (snapshot) => {
             window.observacoes = [];
             snapshot.forEach((child) => { window.observacoes.push({ key: child.key, ...child.val() }); });
@@ -489,14 +497,12 @@
             if(window.updateUI) window.updateUI();
         });
 
-        // ESCUTA: SOLICITAÇÕES DE PREVISÃO
         onValue(ref(db, 'solicitacoes_previsao'), (snapshot) => {
             window.solicitacoesPrev = [];
             snapshot.forEach((child) => { window.solicitacoesPrev.push({ key: child.key, ...child.val() }); });
             if(window.updateUI) window.updateUI();
         });
 
-        // GRAVAÇÃO DB
         window.saveRMToFirebase = async function(rmData) {
             const rmId = rmData.id; delete rmData.id;
             await set(ref(db, 'rms/' + rmId), rmData);
@@ -582,7 +588,7 @@
             if(cat === 'CIVIL') return 'cat-badge cat-civil';
             if(cat === 'ELÉTRICA') return 'cat-badge cat-eletrica';
             if(cat === 'QUALIDADE / SEGURANÇA') return 'cat-badge cat-qualidade';
-            return 'cat-badge'; // fallback seguro
+            return 'cat-badge'; 
         }
 
         function getStatusHtml(status) {
@@ -606,9 +612,14 @@
 
         function getSlaHtml(prevDate, status) {
             if(!prevDate || prevDate === '-') return '<span style="color:var(--text-muted); font-weight:600;">-</span>';
+            
+            // Proteção contra datas que venham vazias ou sem os traços corretos
+            if (typeof prevDate !== 'string' || !prevDate.includes('-')) {
+                return `<span style="color:var(--text-muted); font-weight:600;">${prevDate}</span>`;
+            }
+
             const prevParts = prevDate.split('-');
             
-            // Trava de segurança para dados inconsistentes
             if (prevParts.length < 3) return `<span style="color:var(--text-muted); font-weight:600;">${prevDate}</span>`;
             
             const formattedDate = `${prevParts[2]}/${prevParts[1]}/${prevParts[0]}`;
@@ -640,7 +651,8 @@
             const urlInput = document.getElementById('rm-anexo-url').value.trim();
             
             const rmData = {
-                id: document.getElementById('rm-id').value.trim(), 
+                id: document.getElementById('rm-id').value.trim(),
+                descricao: document.getElementById('rm-descricao').value.trim(), 
                 categoria: document.getElementById('rm-categoria').value,
                 data: document.getElementById('rm-data').value, 
                 solicitante: document.getElementById('rm-solicitante').value.trim(),
@@ -693,11 +705,10 @@
                 reqBadge.style.display = 'none';
             }
 
-            // Tabela de RMs
             const tbody = document.getElementById('rm-table-body');
             tbody.innerHTML = '';
             filteredData.forEach(rm => {
-                // TRAVAS DE SEGURANÇA PARA RMs INCOMPLETAS (Enviadas pela automação)
+                const descricao = rm.descricao || '—';
                 const categoria = rm.categoria || 'NÃO DEFINIDA';
                 const solicitante = rm.solicitante || '—';
                 const status = rm.status || 'Pendente';
@@ -706,20 +717,22 @@
                 const prev = rm.prev || '-';
                 const pendencias = rm.pendencias || '';
                 
-                // Trata a data com segurança caso venha vazia do n8n
                 let dataEmissao = '—';
-                if (rm.data) {
+                if (rm.data && typeof rm.data === 'string') {
                     if (rm.data.includes('-')) {
                         dataEmissao = rm.data.split('-').reverse().join('/');
                     } else {
                         dataEmissao = rm.data;
                     }
+                } else if (rm.data) {
+                     dataEmissao = String(rm.data);
                 }
 
                 let actionButtons = '';
                 if (currentRole === "ADMIN") {
+                    // Botão de editar global (chamando a função window.triggerEditRM com aspas garantidas)
                     actionButtons = `
-                        <button class="btn-action" onclick="triggerEditRM('${rm.id}')" title="Editar Documento">
+                        <button class="btn-action" onclick="window.triggerEditRM('${rm.id}')" title="Editar Documento">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
                         </button>
                         <button class="btn-action btn-delete" onclick="deleteRM('${rm.id}')" title="Excluir Definitivamente">
@@ -737,8 +750,9 @@
 
                 let anexoHtml = '<span style="color:var(--text-muted); opacity:0.4;">—</span>';
                 if (rm.fileUrl) {
+                    let href = (typeof rm.fileUrl === 'string' && rm.fileUrl.startsWith('http')) ? rm.fileUrl : '#';
                     anexoHtml = `
-                        <a href="${rm.fileUrl}" target="_blank" class="btn-action" style="color:var(--primary); border-color:rgba(14, 165, 233, 0.3);" title="Abrir Link Externo">
+                        <a href="${href}" target="_blank" class="btn-action" style="color:var(--primary); border-color:rgba(14, 165, 233, 0.3);" title="Abrir Anexo">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
                             Planilha
                         </a>
@@ -750,7 +764,6 @@
                     statusColHTML += `<span class="pendencias-text">Faltam: ${pendencias}</span>`;
                 }
 
-                // LÓGICA DE INTELIGÊNCIA DO COMPRADOR VS IA AUTOMÁTICA
                 let compradorUI = '<span style="color:var(--text-muted); opacity:0.5; font-weight:400;">Não atribuído</span>';
                 if (comprador !== '-' && comprador !== '') {
                     compradorUI = comprador;
@@ -761,6 +774,7 @@
                 tbody.innerHTML += `
                     <tr>
                         <td style="font-family:monospace; color:var(--text-main); font-weight:600;">${rm.id}</td>
+                        <td><strong style="color:var(--text-main);">${descricao}</strong></td>
                         <td><span class="${getCatClass(categoria)}">${categoria}</span></td>
                         <td>${dataEmissao}</td>
                         <td style="color:var(--text-main)">${solicitante}</td>
@@ -774,7 +788,6 @@
                 `;
             });
 
-            // Tabela de Solicitações no Admin
             const reqTbody = document.getElementById('req-table-body');
             if(reqTbody) {
                 reqTbody.innerHTML = '';
@@ -819,23 +832,107 @@
             }
         }
 
-        function triggerEditRM(id) {
-            const rm = (window.rms || []).find(r => r.id === id);
-            if(!rm) return;
-            openCreateMode();
-            document.getElementById('rm-id').value = rm.id; 
-            document.getElementById('rm-categoria').value = rm.categoria || 'MECÂNICA';
-            document.getElementById('rm-data').value = rm.data || ''; 
-            document.getElementById('rm-solicitante').value = rm.solicitante || '';
-            document.getElementById('rm-status').value = rm.status || 'Pendente'; 
-            document.getElementById('rm-oc').value = (!rm.oc || rm.oc === '-' || rm.oc === '—') ? '' : rm.oc;
-            document.getElementById('rm-comprador').value = (!rm.comprador || rm.comprador === '-') ? '' : rm.comprador; 
-            document.getElementById('rm-prev').value = (!rm.prev || rm.prev === '-') ? '' : rm.prev;
-            
-            document.getElementById('rm-pendencias').value = rm.pendencias || '';
-            togglePendencias();
+        // FUNÇÃO DE EDIÇÃO TOTALMENTE BLINDADA
+        window.triggerEditRM = function(id) {
+            try {
+                // A conversão String() força que "337" e 337 sejam entendidos como iguais
+                const rm = (window.rms || []).find(r => String(r.id) === String(id));
+                
+                if(!rm) {
+                    alert("Erro de Leitura: O sistema não conseguiu localizar o documento " + id + ". Tente recarregar a página.");
+                    return;
+                }
+                
+                openCreateMode();
+                document.getElementById('rm-id').value = rm.id || ''; 
+                document.getElementById('rm-descricao').value = rm.descricao || '';
+                document.getElementById('rm-categoria').value = rm.categoria || 'MECÂNICA';
+                
+                // Formatando e protegendo a data de Emissão
+                let dataInput = '';
+                if (rm.data && typeof String(rm.data) === 'string' && rm.data !== '-' && rm.data !== '—') {
+                    let textData = String(rm.data);
+                    if (textData.includes('/')) {
+                        dataInput = textData.split('/').reverse().join('-');
+                    } else {
+                        dataInput = textData;
+                    }
+                }
+                document.getElementById('rm-data').value = dataInput; 
 
-            document.getElementById('rm-anexo-url').value = rm.fileUrl ? rm.fileUrl : '';
+                document.getElementById('rm-solicitante').value = rm.solicitante || '';
+                document.getElementById('rm-status').value = rm.status || 'Pendente'; 
+                document.getElementById('rm-oc').value = (!rm.oc || rm.oc === '-' || rm.oc === '—') ? '' : rm.oc;
+                document.getElementById('rm-comprador').value = (!rm.comprador || rm.comprador === '-') ? '' : rm.comprador; 
+                
+                // Formatando e protegendo a data de Previsão
+                let prevInput = '';
+                if (rm.prev && typeof String(rm.prev) === 'string' && rm.prev !== '-' && rm.prev !== '—') {
+                    let textPrev = String(rm.prev);
+                    if (textPrev.includes('/')) {
+                        prevInput = textPrev.split('/').reverse().join('-');
+                    } else {
+                        prevInput = textPrev;
+                    }
+                }
+                document.getElementById('rm-prev').value = prevInput;
+                
+                document.getElementById('rm-pendencias').value = rm.pendencias || '';
+                togglePendencias();
+
+                document.getElementById('rm-anexo-url').value = rm.fileUrl ? rm.fileUrl : '';
+
+                // Joga o usuário suavemente pro topo pra ver o formulário
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+
+            } catch (error) {
+                console.error(error);
+                alert("Falha interna ao tentar abrir a edição desta RM. Erro: " + error.message);
+            }
+        };
+
+        // Lógica de sincronização para RMs antigas (Planilhas informadas)
+        window.syncInitialData = async function() {
+            const hoje = new Date().toISOString().split('T')[0];
+            
+            const initialRMs = [
+                { id: "337", descricao: "TUBULAÇÃO PRÉDIO INFL", categoria: "CIVIL", solicitante: "Thiago", status: "Pendente", fileUrl: "https://drive.google.com/open?id=1F3cRyRFmJObknw7SfUua8cggRCdJ8QcD7", data: hoje, oc: "-", comprador: "-", prev: "-" },
+                { id: "336", descricao: "ANDAIMES", categoria: "CIVIL", solicitante: "Thiago", status: "Pendente", fileUrl: "https://drive.google.com/open?id=1Bf4Qva4fgGal7mvpxy_JS55h21e_9N_Y6", data: hoje, oc: "-", comprador: "-", prev: "-" },
+                { id: "334", descricao: "Ferramentas Civil", categoria: "CIVIL", solicitante: "Thiago", status: "Pendente", fileUrl: "https://drive.google.com/open?id=1-iesxSnzgMzAS1vZ6V5ZtuDlOUkxnP_G5", data: hoje, oc: "-", comprador: "-", prev: "-" },
+                { id: "332", descricao: "ESTOQUE E APLICAÇÃO", categoria: "CIVIL", solicitante: "Thiago", status: "Pendente", fileUrl: "https://drive.google.com/open?id=1yWKD9UmFCiq6G0umL0VK5HhgqPnaFiRB4", data: hoje, oc: "-", comprador: "-", prev: "-" },
+                { id: "331", descricao: "COMPOUD", categoria: "CIVIL", solicitante: "Thiago", status: "Pendente", fileUrl: "https://drive.google.com/open?id=1Td7ogRLooudM52MNNkhnI8QWewiYhzZN3", data: hoje, oc: "-", comprador: "-", prev: "-" },
+                { id: "328", descricao: "GRAUTE EMERGENCIAL", categoria: "CIVIL", solicitante: "Thiago", status: "Pendente", fileUrl: "https://drive.google.com/open?id=1CI3ywqU46sD-MwSXOPdbils9no42NSTV2", data: hoje, oc: "-", comprador: "-", prev: "-" },
+                { id: "325", descricao: "MADEIRITE NAVAL", categoria: "CIVIL", solicitante: "Thiago", status: "Pendente", fileUrl: "https://drive.google.com/open?id=1Pzzw_ljiq2ruoU4-17emWqJb1cvTWckL1", data: hoje, oc: "-", comprador: "-", prev: "-" },
+                { id: "324", descricao: "ALUGUEL DE BOBCAT - ADM", categoria: "CIVIL", solicitante: "Thiago", status: "Pendente", fileUrl: "https://drive.google.com/open?id=1zjOaKgX28kGICRPj7pBd-7bjoWK-8aIQ", data: hoje, oc: "-", comprador: "-", prev: "-" },
+                { id: "323", descricao: "MATERIAL PARA ESGOTO INDUSTRIAL ÁREA NORTE", categoria: "CIVIL", solicitante: "Thiago", status: "Pendente", fileUrl: "https://drive.google.com/open?id=11N9_CdZxt4BDkFnvKzOyGYOqZWtK0vd3", data: hoje, oc: "-", comprador: "-", prev: "-" }
+            ];
+
+            if(!confirm("Deseja sincronizar as antigas planilhas para o Banco de Dados?\nIsso atualizará RMs que não possuem anexo e criará as faltantes.")) return;
+
+            let alteracoes = 0;
+
+            for (const item of initialRMs) {
+                const existingRM = window.rms.find(r => String(r.id) === String(item.id));
+                if (!existingRM) {
+                    await window.saveRMToFirebase({ ...item, id: item.id }); 
+                    alteracoes++;
+                } else {
+                    let changed = false;
+                    if (item.fileUrl.startsWith('http') && existingRM.fileUrl !== item.fileUrl) {
+                        existingRM.fileUrl = item.fileUrl;
+                        changed = true;
+                    }
+                    if (!existingRM.descricao) {
+                        existingRM.descricao = item.descricao;
+                        changed = true;
+                    }
+                    if (changed) {
+                        await window.saveRMToFirebase(existingRM);
+                        alteracoes++;
+                    }
+                }
+            }
+            alert(`Sincronização concluída! ${alteracoes} RMs foram criadas ou atualizadas com os links do Drive.`);
         }
 
         window.updateUI();
