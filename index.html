@@ -849,16 +849,17 @@
         // Lógica de sincronização para RMs antigas (Planilhas informadas)
         window.syncInitialData = async function() {
             const hoje = new Date().toISOString().split('T')[0];
+            
             const initialRMs = [
-                { id: "337", descricao: "TUBULAÇÃO PRÉDIO INFL", categoria: "CIVIL", solicitante: "Thiago", status: "Pendente", fileUrl: "OBR SOLVENTUM – Requisição de Materiais 337 - TUBULAÇÃO PRÉDIO INFL.xlsx", data: hoje, oc: "-", comprador: "-", prev: "-" },
-                { id: "336", descricao: "ANDAIMES", categoria: "CIVIL", solicitante: "Thiago", status: "Pendente", fileUrl: "OBR SOLVENTUM – Requisição de Materiais 336 - ANDAIMES .xlsx", data: hoje, oc: "-", comprador: "-", prev: "-" },
-                { id: "334", descricao: "Ferramentas Civil", categoria: "CIVIL", solicitante: "Thiago", status: "Pendente", fileUrl: "OBR SOLVENTUM – Requisição de Materiais 334- Ferramentas Civil.xlsx", data: hoje, oc: "-", comprador: "-", prev: "-" },
-                { id: "332", descricao: "ESTOQUE E APLICAÇÃO", categoria: "CIVIL", solicitante: "Thiago", status: "Pendente", fileUrl: "OBR SOLVENTUM REQUISIÇÃO DE MATERIAIS 332 - ESTOQUE E APLICAÇÃO .xlsx", data: hoje, oc: "-", comprador: "-", prev: "-" },
-                { id: "331", descricao: "COMPOUD", categoria: "CIVIL", solicitante: "Thiago", status: "Pendente", fileUrl: "OBR SOLVENTUM REQUISIÇÃO DE MATERIAIS 331- COMPOUD.xlsx", data: hoje, oc: "-", comprador: "-", prev: "-" },
-                { id: "328", descricao: "GRAUTE EMERGENCIAL", categoria: "CIVIL", solicitante: "Thiago", status: "Pendente", fileUrl: "OBR SOLVENTUM – Requisição de Materiais 328 - GRAUTE EMERGENCIAL.xlsx", data: hoje, oc: "-", comprador: "-", prev: "-" },
-                { id: "325", descricao: "MADEIRITE NAVAL", categoria: "CIVIL", solicitante: "Thiago", status: "Pendente", fileUrl: "Cópia de OBRA SOLVENTUM - Requisição de Materiais - RM 325 - MADEIRITE NAVAL.xlsx", data: hoje, oc: "-", comprador: "-", prev: "-" },
-                { id: "324", descricao: "ALUGUEL DE BOBCAT - ADM", categoria: "CIVIL", solicitante: "Thiago", status: "Pendente", fileUrl: "Cópia de OBRA SOLVENTUM - Requisição de Materiais - RM 324 - ALUGUEL DE BOBCAT - ADM.xlsx", data: hoje, oc: "-", comprador: "-", prev: "-" },
-                { id: "323", descricao: "MATERIAL PARA ESGOTO INDUSTRIAL ÁREA NORTE", categoria: "CIVIL", solicitante: "Thiago", status: "Pendente", fileUrl: "Cópia de OBRA SOLVENTUM - Requisição de Materiais - RM 323 - MATERIAL PARA ESGOTO INDUSTRIAL ÁREA NORTE.xlsx", data: hoje, oc: "-", comprador: "-", prev: "-" }
+                { id: "337", descricao: "TUBULAÇÃO PRÉDIO INFL", categoria: "CIVIL", solicitante: "Thiago", status: "Pendente", fileUrl: "https://drive.google.com/open?id=1F3cRyRFmJObknw7SfUua8cggRCdJ8QcD7", data: hoje, oc: "-", comprador: "-", prev: "-" },
+                { id: "336", descricao: "ANDAIMES", categoria: "CIVIL", solicitante: "Thiago", status: "Pendente", fileUrl: "https://drive.google.com/open?id=1Bf4Qva4fgGal7mvpxy_JS55h21e_9N_Y6", data: hoje, oc: "-", comprador: "-", prev: "-" },
+                { id: "334", descricao: "Ferramentas Civil", categoria: "CIVIL", solicitante: "Thiago", status: "Pendente", fileUrl: "https://drive.google.com/open?id=1-iesxSnzgMzAS1vZ6V5ZtuDlOUkxnP_G5", data: hoje, oc: "-", comprador: "-", prev: "-" },
+                { id: "332", descricao: "ESTOQUE E APLICAÇÃO", categoria: "CIVIL", solicitante: "Thiago", status: "Pendente", fileUrl: "https://drive.google.com/open?id=1yWKD9UmFCiq6G0umL0VK5HhgqPnaFiRB4", data: hoje, oc: "-", comprador: "-", prev: "-" },
+                { id: "331", descricao: "COMPOUD", categoria: "CIVIL", solicitante: "Thiago", status: "Pendente", fileUrl: "https://drive.google.com/open?id=1Td7ogRLooudM52MNNkhnI8QWewiYhzZN3", data: hoje, oc: "-", comprador: "-", prev: "-" },
+                { id: "328", descricao: "GRAUTE EMERGENCIAL", categoria: "CIVIL", solicitante: "Thiago", status: "Pendente", fileUrl: "https://drive.google.com/open?id=1CI3ywqU46sD-MwSXOPdbils9no42NSTV2", data: hoje, oc: "-", comprador: "-", prev: "-" },
+                { id: "325", descricao: "MADEIRITE NAVAL", categoria: "CIVIL", solicitante: "Thiago", status: "Pendente", fileUrl: "https://drive.google.com/open?id=1Pzzw_ljiq2ruoU4-17emWqJb1cvTWckL1", data: hoje, oc: "-", comprador: "-", prev: "-" },
+                { id: "324", descricao: "ALUGUEL DE BOBCAT - ADM", categoria: "CIVIL", solicitante: "Thiago", status: "Pendente", fileUrl: "https://drive.google.com/open?id=1zjOaKgX28kGICRPj7pBd-7bjoWK-8aIQ", data: hoje, oc: "-", comprador: "-", prev: "-" },
+                { id: "323", descricao: "MATERIAL PARA ESGOTO INDUSTRIAL ÁREA NORTE", categoria: "CIVIL", solicitante: "Thiago", status: "Pendente", fileUrl: "https://drive.google.com/open?id=11N9_CdZxt4BDkFnvKzOyGYOqZWtK0vd3", data: hoje, oc: "-", comprador: "-", prev: "-" }
             ];
 
             if(!confirm("Deseja sincronizar as antigas planilhas para o Banco de Dados?\nIsso atualizará RMs que não possuem anexo e criará as faltantes.")) return;
@@ -868,11 +869,11 @@
             for (const item of initialRMs) {
                 const existingRM = window.rms.find(r => r.id === item.id);
                 if (!existingRM) {
-                    await window.saveRMToFirebase({ ...item, id: item.id }); // Salva garantindo a estrutura
+                    await window.saveRMToFirebase({ ...item, id: item.id }); 
                     alteracoes++;
                 } else {
                     let changed = false;
-                    if (!existingRM.fileUrl) {
+                    if (item.fileUrl.startsWith('http') && existingRM.fileUrl !== item.fileUrl) {
                         existingRM.fileUrl = item.fileUrl;
                         changed = true;
                     }
@@ -886,7 +887,7 @@
                     }
                 }
             }
-            alert(`Sincronização concluída! ${alteracoes} RMs foram criadas ou atualizadas.`);
+            alert(`Sincronização concluída! ${alteracoes} RMs foram criadas ou atualizadas com os links do Drive.`);
         }
 
         window.updateUI();
