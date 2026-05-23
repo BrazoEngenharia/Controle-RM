@@ -313,7 +313,7 @@
                 </button>
             </div>
         </div>
-        <div class="sidebar-footer">v6.1 (Bugfix Edição)</div>
+        <div class="sidebar-footer">v6.2 (Edição Blindada)</div>
     </div>
 
     <div class="main-content">
@@ -352,7 +352,6 @@
                     <form id="rm-form" onsubmit="saveRM(event)">
                         <div class="form-grid">
                             <div class="form-group"><label>Nº Documento RM</label><input type="text" id="rm-id" required></div>
-                            <!-- AQUI FOI REMOVIDO O 'REQUIRED' DA DESCRIÇÃO PARA EVITAR O BUG DE SALVAMENTO -->
                             <div class="form-group full-width"><label>Descrição da RM</label><input type="text" id="rm-descricao" placeholder="Ex: TUBULAÇÃO PRÉDIO INFL"></div>
                             
                             <div class="form-group">
@@ -589,7 +588,7 @@
             if(cat === 'CIVIL') return 'cat-badge cat-civil';
             if(cat === 'ELÉTRICA') return 'cat-badge cat-eletrica';
             if(cat === 'QUALIDADE / SEGURANÇA') return 'cat-badge cat-qualidade';
-            return 'cat-badge'; // fallback seguro
+            return 'cat-badge'; 
         }
 
         function getStatusHtml(status) {
@@ -742,7 +741,6 @@
 
                 let anexoHtml = '<span style="color:var(--text-muted); opacity:0.4;">—</span>';
                 if (rm.fileUrl) {
-                    // Proteção extra contra possíveis falhas caso a URL seja salva num formato não-string
                     let href = (typeof rm.fileUrl === 'string' && rm.fileUrl.startsWith('http')) ? rm.fileUrl : '#';
                     anexoHtml = `
                         <a href="${href}" target="_blank" class="btn-action" style="color:var(--primary); border-color:rgba(14, 165, 233, 0.3);" title="Abrir Anexo">
@@ -825,24 +823,54 @@
             }
         }
 
+        // FUNÇÃO DE EDIÇÃO TOTALMENTE BLINDADA
         function triggerEditRM(id) {
-            const rm = (window.rms || []).find(r => r.id === id);
-            if(!rm) return;
+            // A conversão String() força que "337" e 337 sejam entendidos como iguais, resolvendo o bug da automação externa
+            const rm = (window.rms || []).find(r => String(r.id) === String(id));
+            
+            if(!rm) {
+                alert("Erro: O sistema não conseguiu localizar o documento selecionado. Tente recarregar a página.");
+                return;
+            }
+            
             openCreateMode();
             document.getElementById('rm-id').value = rm.id; 
             document.getElementById('rm-descricao').value = rm.descricao || '';
             document.getElementById('rm-categoria').value = rm.categoria || 'MECÂNICA';
-            document.getElementById('rm-data').value = rm.data || ''; 
+            
+            // Formatando e protegendo a data (Converte DD/MM/YYYY para YYYY-MM-DD aceito pelo input HTML)
+            let dataInput = '';
+            if (rm.data && rm.data !== '-' && rm.data !== '—') {
+                if (rm.data.includes('/')) {
+                    dataInput = rm.data.split('/').reverse().join('-');
+                } else {
+                    dataInput = rm.data;
+                }
+            }
+            document.getElementById('rm-data').value = dataInput; 
+
             document.getElementById('rm-solicitante').value = rm.solicitante || '';
             document.getElementById('rm-status').value = rm.status || 'Pendente'; 
             document.getElementById('rm-oc').value = (!rm.oc || rm.oc === '-' || rm.oc === '—') ? '' : rm.oc;
             document.getElementById('rm-comprador').value = (!rm.comprador || rm.comprador === '-') ? '' : rm.comprador; 
-            document.getElementById('rm-prev').value = (!rm.prev || rm.prev === '-') ? '' : rm.prev;
+            
+            let prevInput = '';
+            if (rm.prev && rm.prev !== '-' && rm.prev !== '—') {
+                if (rm.prev.includes('/')) {
+                    prevInput = rm.prev.split('/').reverse().join('-');
+                } else {
+                    prevInput = rm.prev;
+                }
+            }
+            document.getElementById('rm-prev').value = prevInput;
             
             document.getElementById('rm-pendencias').value = rm.pendencias || '';
             togglePendencias();
 
             document.getElementById('rm-anexo-url').value = rm.fileUrl ? rm.fileUrl : '';
+
+            // Joga o usuário suavemente pro topo pra ver o formulário
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
         // Lógica de sincronização para RMs antigas (Planilhas informadas)
@@ -866,7 +894,7 @@
             let alteracoes = 0;
 
             for (const item of initialRMs) {
-                const existingRM = window.rms.find(r => r.id === item.id);
+                const existingRM = window.rms.find(r => String(r.id) === String(item.id));
                 if (!existingRM) {
                     await window.saveRMToFirebase({ ...item, id: item.id }); 
                     alteracoes++;
