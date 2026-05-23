@@ -313,7 +313,7 @@
                 </button>
             </div>
         </div>
-        <div class="sidebar-footer">v6.2 (Edição Blindada)</div>
+        <div class="sidebar-footer">v6.3 (Edição Blindada)</div>
     </div>
 
     <div class="main-content">
@@ -612,6 +612,12 @@
 
         function getSlaHtml(prevDate, status) {
             if(!prevDate || prevDate === '-') return '<span style="color:var(--text-muted); font-weight:600;">-</span>';
+            
+            // Proteção contra datas que venham vazias ou sem os traços corretos
+            if (typeof prevDate !== 'string' || !prevDate.includes('-')) {
+                return `<span style="color:var(--text-muted); font-weight:600;">${prevDate}</span>`;
+            }
+
             const prevParts = prevDate.split('-');
             
             if (prevParts.length < 3) return `<span style="color:var(--text-muted); font-weight:600;">${prevDate}</span>`;
@@ -712,18 +718,21 @@
                 const pendencias = rm.pendencias || '';
                 
                 let dataEmissao = '—';
-                if (rm.data) {
+                if (rm.data && typeof rm.data === 'string') {
                     if (rm.data.includes('-')) {
                         dataEmissao = rm.data.split('-').reverse().join('/');
                     } else {
                         dataEmissao = rm.data;
                     }
+                } else if (rm.data) {
+                     dataEmissao = String(rm.data);
                 }
 
                 let actionButtons = '';
                 if (currentRole === "ADMIN") {
+                    // Botão de editar global (chamando a função window.triggerEditRM com aspas garantidas)
                     actionButtons = `
-                        <button class="btn-action" onclick="triggerEditRM('${rm.id}')" title="Editar Documento">
+                        <button class="btn-action" onclick="window.triggerEditRM('${rm.id}')" title="Editar Documento">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
                         </button>
                         <button class="btn-action btn-delete" onclick="deleteRM('${rm.id}')" title="Excluir Definitivamente">
@@ -824,54 +833,63 @@
         }
 
         // FUNÇÃO DE EDIÇÃO TOTALMENTE BLINDADA
-        function triggerEditRM(id) {
-            // A conversão String() força que "337" e 337 sejam entendidos como iguais, resolvendo o bug da automação externa
-            const rm = (window.rms || []).find(r => String(r.id) === String(id));
-            
-            if(!rm) {
-                alert("Erro: O sistema não conseguiu localizar o documento selecionado. Tente recarregar a página.");
-                return;
-            }
-            
-            openCreateMode();
-            document.getElementById('rm-id').value = rm.id; 
-            document.getElementById('rm-descricao').value = rm.descricao || '';
-            document.getElementById('rm-categoria').value = rm.categoria || 'MECÂNICA';
-            
-            // Formatando e protegendo a data (Converte DD/MM/YYYY para YYYY-MM-DD aceito pelo input HTML)
-            let dataInput = '';
-            if (rm.data && rm.data !== '-' && rm.data !== '—') {
-                if (rm.data.includes('/')) {
-                    dataInput = rm.data.split('/').reverse().join('-');
-                } else {
-                    dataInput = rm.data;
+        window.triggerEditRM = function(id) {
+            try {
+                // A conversão String() força que "337" e 337 sejam entendidos como iguais
+                const rm = (window.rms || []).find(r => String(r.id) === String(id));
+                
+                if(!rm) {
+                    alert("Erro de Leitura: O sistema não conseguiu localizar o documento " + id + ". Tente recarregar a página.");
+                    return;
                 }
-            }
-            document.getElementById('rm-data').value = dataInput; 
-
-            document.getElementById('rm-solicitante').value = rm.solicitante || '';
-            document.getElementById('rm-status').value = rm.status || 'Pendente'; 
-            document.getElementById('rm-oc').value = (!rm.oc || rm.oc === '-' || rm.oc === '—') ? '' : rm.oc;
-            document.getElementById('rm-comprador').value = (!rm.comprador || rm.comprador === '-') ? '' : rm.comprador; 
-            
-            let prevInput = '';
-            if (rm.prev && rm.prev !== '-' && rm.prev !== '—') {
-                if (rm.prev.includes('/')) {
-                    prevInput = rm.prev.split('/').reverse().join('-');
-                } else {
-                    prevInput = rm.prev;
+                
+                openCreateMode();
+                document.getElementById('rm-id').value = rm.id || ''; 
+                document.getElementById('rm-descricao').value = rm.descricao || '';
+                document.getElementById('rm-categoria').value = rm.categoria || 'MECÂNICA';
+                
+                // Formatando e protegendo a data de Emissão
+                let dataInput = '';
+                if (rm.data && typeof String(rm.data) === 'string' && rm.data !== '-' && rm.data !== '—') {
+                    let textData = String(rm.data);
+                    if (textData.includes('/')) {
+                        dataInput = textData.split('/').reverse().join('-');
+                    } else {
+                        dataInput = textData;
+                    }
                 }
+                document.getElementById('rm-data').value = dataInput; 
+
+                document.getElementById('rm-solicitante').value = rm.solicitante || '';
+                document.getElementById('rm-status').value = rm.status || 'Pendente'; 
+                document.getElementById('rm-oc').value = (!rm.oc || rm.oc === '-' || rm.oc === '—') ? '' : rm.oc;
+                document.getElementById('rm-comprador').value = (!rm.comprador || rm.comprador === '-') ? '' : rm.comprador; 
+                
+                // Formatando e protegendo a data de Previsão
+                let prevInput = '';
+                if (rm.prev && typeof String(rm.prev) === 'string' && rm.prev !== '-' && rm.prev !== '—') {
+                    let textPrev = String(rm.prev);
+                    if (textPrev.includes('/')) {
+                        prevInput = textPrev.split('/').reverse().join('-');
+                    } else {
+                        prevInput = textPrev;
+                    }
+                }
+                document.getElementById('rm-prev').value = prevInput;
+                
+                document.getElementById('rm-pendencias').value = rm.pendencias || '';
+                togglePendencias();
+
+                document.getElementById('rm-anexo-url').value = rm.fileUrl ? rm.fileUrl : '';
+
+                // Joga o usuário suavemente pro topo pra ver o formulário
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+
+            } catch (error) {
+                console.error(error);
+                alert("Falha interna ao tentar abrir a edição desta RM. Erro: " + error.message);
             }
-            document.getElementById('rm-prev').value = prevInput;
-            
-            document.getElementById('rm-pendencias').value = rm.pendencias || '';
-            togglePendencias();
-
-            document.getElementById('rm-anexo-url').value = rm.fileUrl ? rm.fileUrl : '';
-
-            // Joga o usuário suavemente pro topo pra ver o formulário
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        }
+        };
 
         // Lógica de sincronização para RMs antigas (Planilhas informadas)
         window.syncInitialData = async function() {
