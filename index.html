@@ -313,7 +313,7 @@
                 </button>
             </div>
         </div>
-        <div class="sidebar-footer">v6.0 (AI Auto-Sync + Descrições)</div>
+        <div class="sidebar-footer">v6.1 (Bugfix Edição)</div>
     </div>
 
     <div class="main-content">
@@ -352,7 +352,9 @@
                     <form id="rm-form" onsubmit="saveRM(event)">
                         <div class="form-grid">
                             <div class="form-group"><label>Nº Documento RM</label><input type="text" id="rm-id" required></div>
-                            <div class="form-group full-width"><label>Descrição da RM</label><input type="text" id="rm-descricao" placeholder="Ex: TUBULAÇÃO PRÉDIO INFL" required></div>
+                            <!-- AQUI FOI REMOVIDO O 'REQUIRED' DA DESCRIÇÃO PARA EVITAR O BUG DE SALVAMENTO -->
+                            <div class="form-group full-width"><label>Descrição da RM</label><input type="text" id="rm-descricao" placeholder="Ex: TUBULAÇÃO PRÉDIO INFL"></div>
+                            
                             <div class="form-group">
                                 <label>Setor Demandante</label>
                                 <select id="rm-categoria" required>
@@ -362,8 +364,8 @@
                                     <option value="QUALIDADE / SEGURANÇA">QUALIDADE / SEGURANÇA</option>
                                 </select>
                             </div>
-                            <div class="form-group"><label>Data da Emissão</label><input type="date" id="rm-data" required></div>
-                            <div class="form-group"><label>Responsável / Solicitante</label><input type="text" id="rm-solicitante" required></div>
+                            <div class="form-group"><label>Data da Emissão</label><input type="date" id="rm-data"></div>
+                            <div class="form-group"><label>Responsável / Solicitante</label><input type="text" id="rm-solicitante"></div>
                             <div class="form-group">
                                 <label>Situação do Pedido</label>
                                 <select id="rm-status" onchange="togglePendencias()">
@@ -483,14 +485,12 @@
         window.observacoes = [];
         window.solicitacoesPrev = [];
 
-        // ESCUTA: RMs
         onValue(ref(db, 'rms'), (snapshot) => {
             window.rms = [];
             snapshot.forEach((child) => { window.rms.push({ id: child.key, ...child.val() }); });
             if(window.updateUI) window.updateUI();
         });
 
-        // ESCUTA: OBSERVAÇÕES
         onValue(ref(db, 'observacoes'), (snapshot) => {
             window.observacoes = [];
             snapshot.forEach((child) => { window.observacoes.push({ key: child.key, ...child.val() }); });
@@ -498,14 +498,12 @@
             if(window.updateUI) window.updateUI();
         });
 
-        // ESCUTA: SOLICITAÇÕES DE PREVISÃO
         onValue(ref(db, 'solicitacoes_previsao'), (snapshot) => {
             window.solicitacoesPrev = [];
             snapshot.forEach((child) => { window.solicitacoesPrev.push({ key: child.key, ...child.val() }); });
             if(window.updateUI) window.updateUI();
         });
 
-        // GRAVAÇÃO DB
         window.saveRMToFirebase = async function(rmData) {
             const rmId = rmData.id; delete rmData.id;
             await set(ref(db, 'rms/' + rmId), rmData);
@@ -744,9 +742,10 @@
 
                 let anexoHtml = '<span style="color:var(--text-muted); opacity:0.4;">—</span>';
                 if (rm.fileUrl) {
-                    let href = rm.fileUrl.startsWith('http') ? rm.fileUrl : '#';
+                    // Proteção extra contra possíveis falhas caso a URL seja salva num formato não-string
+                    let href = (typeof rm.fileUrl === 'string' && rm.fileUrl.startsWith('http')) ? rm.fileUrl : '#';
                     anexoHtml = `
-                        <a href="${href}" target="_blank" class="btn-action" style="color:var(--primary); border-color:rgba(14, 165, 233, 0.3);" title="${rm.fileUrl}">
+                        <a href="${href}" target="_blank" class="btn-action" style="color:var(--primary); border-color:rgba(14, 165, 233, 0.3);" title="Abrir Anexo">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
                             Planilha
                         </a>
