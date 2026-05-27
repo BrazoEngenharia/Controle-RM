@@ -10,33 +10,35 @@
 
         :root {
             /* Palette Core - Dark Engineering */
-            --bg-base: #020617; /* Void/Canvas */
-            --bg-app: #090f1e; /* Main Surface - Deeper Blue/Black */
+            --bg-base: #020617;
+            --bg-app: #090f1e;
             --sidebar-bg: rgba(9, 15, 30, 0.85);
             
-            /* Materiais e Superfícies (Glassmorphism & PBR) */
+            /* Materiais e Superfícies */
             --surface-100: rgba(15, 23, 42, 0.4);
             --surface-200: rgba(30, 41, 59, 0.6);
             --surface-300: rgba(51, 65, 85, 0.5);
             
-            /* Luzes Speculares e Ambientais */
+            /* Luzes */
             --glass-border: rgba(255, 255, 255, 0.05);
             --glass-highlight: rgba(255, 255, 255, 0.15);
             --shadow-ambient: 0 10px 30px rgba(0, 0, 0, 0.5);
             --shadow-contact: inset 0 1px 0 rgba(255, 255, 255, 0.05);
             
-            /* Emissive Lights (Cores Ativas com Glow) */
-            --primary: #0ea5e9;
+            /* Emissive Lights (Status Colors) */
+            --primary: #0ea5e9; /* OC Emitida */
             --primary-glow: 0 0 20px rgba(14, 165, 233, 0.5);
-            --accent: #f59e0b;
+            --accent: #f59e0b; /* Pendente */
             --accent-glow: 0 0 20px rgba(245, 158, 11, 0.5);
-            --success: #10b981;
+            --success: #10b981; /* Entregue */
             --success-glow: 0 0 20px rgba(16, 185, 129, 0.5);
-            --danger: #ef4444;
+            --danger: #ef4444; 
             --danger-glow: 0 0 20px rgba(239, 68, 68, 0.5);
-            --purple: #8b5cf6;
+            --purple: #8b5cf6; /* Entregue Parcialmente */
+            --cyan: #06b6d4; /* OC Parcial (NOVO STATUS) */
+            --cyan-glow: 0 0 20px rgba(6, 182, 212, 0.5);
             
-            /* Textos e Tipografia */
+            /* Textos */
             --text-main: #f8fafc;
             --text-muted: #64748b;
             --text-bright: #ffffff;
@@ -49,7 +51,7 @@
             --tag-eletrica: #eab308;
             --tag-qualidade: #e11d48;
 
-            /* Física de Transição (Spring/Expo Curves) */
+            /* Transições */
             --transition-snappy: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
             --transition-smooth: all 0.6s cubic-bezier(0.22, 1, 0.36, 1);
             --transition-heavy: all 0.5s cubic-bezier(0.19, 1, 0.22, 1);
@@ -58,25 +60,17 @@
         * { box-sizing: border-box; margin: 0; padding: 0; }
 
         body {
-            background-color: var(--bg-base);
-            color: var(--text-main);
-            display: flex;
-            height: 100vh;
-            overflow: hidden;
-            font-family: var(--font-ui);
-            -webkit-font-smoothing: antialiased;
-            -moz-osx-font-smoothing: grayscale;
-            position: relative;
+            background-color: var(--bg-base); color: var(--text-main); display: flex;
+            height: 100vh; overflow: hidden; font-family: var(--font-ui);
+            -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; position: relative;
         }
 
-        /* TEXTURA FÍSICA: Ruído SVG renderizado por hardware para quebrar o banding do gradiente */
         body::after {
             content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0;
             background: url('data:image/svg+xml;utf8,<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"><filter id="noiseFilter"><feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="3" stitchTiles="stitch"/></filter><rect width="100%" height="100%" filter="url(%23noiseFilter)"/></svg>');
             opacity: 0.015; pointer-events: none; z-index: 99999;
         }
 
-        /* ENGINE ENVIRONMENT: Grid Rendering e Atmospheric Scattering */
         body::before {
             content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0;
             background-image: 
@@ -85,318 +79,138 @@
                 linear-gradient(rgba(255,255,255,0.015) 1px, transparent 1px),
                 linear-gradient(90deg, rgba(255,255,255,0.015) 1px, transparent 1px);
             background-size: 100% 100%, 100% 100%, 50px 50px, 50px 50px;
-            background-position: center top;
-            z-index: -1; pointer-events: none;
-            transform: translateZ(0); 
+            background-position: center top; z-index: -1; pointer-events: none; transform: translateZ(0); 
         }
 
         .icon-svg { width: 18px; height: 18px; fill: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
 
-        /* --- WATERMARK GLOBAL - A Assinatura de Hardware --- */
         .watermark-global {
-            position: fixed;
-            right: 12px;
-            bottom: 24px;
-            z-index: 99990;
-            pointer-events: none;
-            font-family: var(--font-mono);
-            font-size: 0.55rem;
-            font-weight: 800;
-            letter-spacing: 0.4em;
-            color: rgba(255, 255, 255, 0.08);
-            writing-mode: vertical-rl;
-            transform: rotate(180deg);
-            text-transform: uppercase;
-            user-select: none;
-            white-space: nowrap;
-            transition: var(--transition-smooth);
+            position: fixed; right: 12px; bottom: 24px; z-index: 99990; pointer-events: none;
+            font-family: var(--font-mono); font-size: 0.55rem; font-weight: 800; letter-spacing: 0.4em;
+            color: rgba(255, 255, 255, 0.08); writing-mode: vertical-rl; transform: rotate(180deg);
+            text-transform: uppercase; user-select: none; white-space: nowrap; transition: var(--transition-smooth);
         }
         .watermark-global span { color: var(--primary); opacity: 0.3; margin: 5px 0;}
         body:hover .watermark-global { color: rgba(255, 255, 255, 0.15); }
 
-        /* --- TELA DE PORTAL --- */
+        /* PORTAL */
         #portal-screen {
-            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-            background: rgba(2, 6, 23, 0.90);
-            backdrop-filter: blur(30px); -webkit-backdrop-filter: blur(30px);
-            z-index: 9999; display: flex; flex-direction: column;
-            align-items: center; justify-content: center; padding: 20px;
-            transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.8s;
-            perspective: 1200px; /* Para o tilt dos cards */
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(2, 6, 23, 0.90);
+            backdrop-filter: blur(30px); -webkit-backdrop-filter: blur(30px); z-index: 9999; display: flex; flex-direction: column;
+            align-items: center; justify-content: center; padding: 20px; transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.8s; perspective: 1200px;
         }
 
-        .portal-header { 
-            text-align: center; margin-bottom: 70px; 
-            animation: slideDownFade 1s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-        }
-        .portal-header h1 {
-            font-size: 4.5rem; font-weight: 800; letter-spacing: 0.18em;
-            background: linear-gradient(180deg, #ffffff 0%, #64748b 100%);
-            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-            margin-bottom: 16px; text-transform: uppercase;
-            filter: drop-shadow(0 10px 20px rgba(0,0,0,0.5));
-            line-height: 1.1;
-        }
-        .portal-header p { 
-            color: var(--text-muted); font-family: var(--font-mono); font-size: 0.95rem; 
-            font-weight: 600; letter-spacing: 0.15em; text-transform: uppercase;
-            background: rgba(15, 23, 42, 0.5); padding: 8px 20px; border-radius: 20px;
-            border: 1px solid var(--glass-border); display: inline-block;
-        }
+        .portal-header { text-align: center; margin-bottom: 70px; animation: slideDownFade 1s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        .portal-header h1 { font-size: 4.5rem; font-weight: 800; letter-spacing: 0.18em; background: linear-gradient(180deg, #ffffff 0%, #64748b 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 16px; text-transform: uppercase; filter: drop-shadow(0 10px 20px rgba(0,0,0,0.5)); line-height: 1.1; }
+        .portal-header p { color: var(--text-muted); font-family: var(--font-mono); font-size: 0.95rem; font-weight: 600; letter-spacing: 0.15em; text-transform: uppercase; background: rgba(15, 23, 42, 0.5); padding: 8px 20px; border-radius: 20px; border: 1px solid var(--glass-border); display: inline-block; }
 
-        .portal-grid {
-            display: grid; grid-template-columns: repeat(2, minmax(320px, 400px));
-            gap: 32px; max-width: 900px; width: 100%;
-        }
+        .portal-grid { display: grid; grid-template-columns: repeat(2, minmax(320px, 400px)); gap: 32px; max-width: 900px; width: 100%; }
 
-        /* CARDS DO PORTAL - Design Monolítico */
         .portal-card {
             background: linear-gradient(180deg, rgba(30, 41, 59, 0.3) 0%, rgba(15, 23, 42, 0.8) 100%);
-            border: 1px solid var(--glass-border);
-            border-top: 2px solid transparent; /* Reservado para a cor da tag */
-            border-radius: 16px; padding: 50px 30px; 
-            text-align: center; cursor: pointer;
-            position: relative; overflow: hidden;
-            display: flex; flex-direction: column; align-items: center; gap: 24px;
-            box-shadow: var(--shadow-ambient), var(--shadow-contact);
-            transition: var(--transition-heavy);
-            opacity: 0; transform: translateY(40px) scale(0.95);
-            animation: cardEntrance 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+            border: 1px solid var(--glass-border); border-top: 2px solid transparent; border-radius: 16px; padding: 50px 30px;
+            text-align: center; cursor: pointer; position: relative; overflow: hidden; display: flex; flex-direction: column; align-items: center; gap: 24px;
+            box-shadow: var(--shadow-ambient), var(--shadow-contact); transition: var(--transition-heavy);
+            opacity: 0; transform: translateY(40px) scale(0.95); animation: cardEntrance 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
         }
+        .portal-card:nth-child(1) { animation-delay: 0.1s; } .portal-card:nth-child(2) { animation-delay: 0.2s; }
+        .portal-card:nth-child(3) { animation-delay: 0.3s; } .portal-card:nth-child(4) { animation-delay: 0.4s; }
 
-        /* Staggered Execution */
-        .portal-card:nth-child(1) { animation-delay: 0.1s; }
-        .portal-card:nth-child(2) { animation-delay: 0.2s; }
-        .portal-card:nth-child(3) { animation-delay: 0.3s; }
-        .portal-card:nth-child(4) { animation-delay: 0.4s; }
-
-        /* VFX: Ambient Occlusion interna + Specular Sweep */
-        .portal-card::before {
-            content: ''; position: absolute; top: 0; left: -100%; width: 50%; height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.03), transparent);
-            transform: skewX(-20deg); transition: 0s;
-        }
-        
-        .portal-card:hover { 
-            transform: translateY(-10px) scale(1.02); 
-            background: linear-gradient(180deg, rgba(51, 65, 85, 0.4) 0%, rgba(15, 23, 42, 0.9) 100%); 
-            border-color: var(--glass-highlight);
-            box-shadow: 0 30px 60px rgba(0,0,0,0.8), inset 0 2px 0 rgba(255,255,255,0.1);
-        }
+        .portal-card::before { content: ''; position: absolute; top: 0; left: -100%; width: 50%; height: 100%; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.03), transparent); transform: skewX(-20deg); transition: 0s; }
+        .portal-card:hover { transform: translateY(-10px) scale(1.02); background: linear-gradient(180deg, rgba(51, 65, 85, 0.4) 0%, rgba(15, 23, 42, 0.9) 100%); border-color: var(--glass-highlight); box-shadow: 0 30px 60px rgba(0,0,0,0.8), inset 0 2px 0 rgba(255,255,255,0.1); }
         .portal-card:hover::before { left: 200%; transition: 1s cubic-bezier(0.16, 1, 0.3, 1); }
 
-        .portal-card .icon-box {
-            width: 80px; height: 80px; border-radius: 20px;
-            display: flex; align-items: center; justify-content: center;
-            transition: var(--transition-heavy);
-            background: rgba(2, 6, 23, 0.8);
-            border: 1px solid var(--glass-border);
-            box-shadow: inset 0 2px 10px rgba(0,0,0,0.5);
-        }
+        .portal-card .icon-box { width: 80px; height: 80px; border-radius: 20px; display: flex; align-items: center; justify-content: center; transition: var(--transition-heavy); background: rgba(2, 6, 23, 0.8); border: 1px solid var(--glass-border); box-shadow: inset 0 2px 10px rgba(0,0,0,0.5); }
         .portal-card:hover .icon-box { transform: scale(1.15) translateY(-8px); }
         .portal-card .icon-box svg { width: 40px; height: 40px; stroke-width: 1.5; }
 
-        /* Cores Ativas Emissivas */
-        .card-mec { border-top-color: var(--tag-mecanica); }
-        .card-mec:hover { box-shadow: 0 -15px 40px rgba(14, 165, 233, 0.15), 0 30px 60px rgba(0,0,0,0.8); }
-        .card-mec .icon-box { color: var(--tag-mecanica); }
-        .card-mec:hover .icon-box { background: rgba(14, 165, 233, 0.1); border-color: var(--tag-mecanica); box-shadow: var(--primary-glow); }
-        
-        .card-civ { border-top-color: var(--tag-civil); }
-        .card-civ:hover { box-shadow: 0 -15px 40px rgba(249, 115, 22, 0.15), 0 30px 60px rgba(0,0,0,0.8); }
-        .card-civ .icon-box { color: var(--tag-civil); }
-        .card-civ:hover .icon-box { background: rgba(249, 115, 22, 0.1); border-color: var(--tag-civil); box-shadow: 0 0 20px rgba(249, 115, 22, 0.5); }
-        
-        .card-ele { border-top-color: var(--tag-eletrica); }
-        .card-ele:hover { box-shadow: 0 -15px 40px rgba(234, 179, 8, 0.15), 0 30px 60px rgba(0,0,0,0.8); }
-        .card-ele .icon-box { color: var(--tag-eletrica); }
-        .card-ele:hover .icon-box { background: rgba(234, 179, 8, 0.1); border-color: var(--tag-eletrica); box-shadow: 0 0 20px rgba(234, 179, 8, 0.5); }
-        
-        .card-qua { border-top-color: var(--tag-qualidade); }
-        .card-qua:hover { box-shadow: 0 -15px 40px rgba(225, 29, 72, 0.15), 0 30px 60px rgba(0,0,0,0.8); }
-        .card-qua .icon-box { color: var(--tag-qualidade); }
-        .card-qua:hover .icon-box { background: rgba(225, 29, 72, 0.1); border-color: var(--tag-qualidade); box-shadow: 0 0 20px rgba(225, 29, 72, 0.5); }
+        .card-mec { border-top-color: var(--tag-mecanica); } .card-mec:hover { box-shadow: 0 -15px 40px rgba(14, 165, 233, 0.15), 0 30px 60px rgba(0,0,0,0.8); } .card-mec .icon-box { color: var(--tag-mecanica); } .card-mec:hover .icon-box { background: rgba(14, 165, 233, 0.1); border-color: var(--tag-mecanica); box-shadow: var(--primary-glow); }
+        .card-civ { border-top-color: var(--tag-civil); } .card-civ:hover { box-shadow: 0 -15px 40px rgba(249, 115, 22, 0.15), 0 30px 60px rgba(0,0,0,0.8); } .card-civ .icon-box { color: var(--tag-civil); } .card-civ:hover .icon-box { background: rgba(249, 115, 22, 0.1); border-color: var(--tag-civil); box-shadow: 0 0 20px rgba(249, 115, 22, 0.5); }
+        .card-ele { border-top-color: var(--tag-eletrica); } .card-ele:hover { box-shadow: 0 -15px 40px rgba(234, 179, 8, 0.15), 0 30px 60px rgba(0,0,0,0.8); } .card-ele .icon-box { color: var(--tag-eletrica); } .card-ele:hover .icon-box { background: rgba(234, 179, 8, 0.1); border-color: var(--tag-eletrica); box-shadow: 0 0 20px rgba(234, 179, 8, 0.5); }
+        .card-qua { border-top-color: var(--tag-qualidade); } .card-qua:hover { box-shadow: 0 -15px 40px rgba(225, 29, 72, 0.15), 0 30px 60px rgba(0,0,0,0.8); } .card-qua .icon-box { color: var(--tag-qualidade); } .card-qua:hover .icon-box { background: rgba(225, 29, 72, 0.1); border-color: var(--tag-qualidade); box-shadow: 0 0 20px rgba(225, 29, 72, 0.5); }
 
-        .portal-card h3 { 
-            font-size: 1.3rem; font-weight: 800; color: var(--text-bright); 
-            letter-spacing: 0.25em; text-transform: uppercase; 
-        }
+        .portal-card h3 { font-size: 1.3rem; font-weight: 800; color: var(--text-bright); letter-spacing: 0.25em; text-transform: uppercase; }
 
-        .master-lock {
-            position: absolute; bottom: 40px; right: 40px; cursor: pointer;
-            opacity: 0.15; display: flex; align-items: center; justify-content: center; 
-            padding: 16px; border-radius: 50%; background: rgba(255,255,255,0.02);
-            border: 1px solid var(--glass-border);
-            transition: var(--transition-snappy);
-        }
-        .master-lock:hover { 
-            opacity: 1; background: rgba(255,255,255,0.05); 
-            transform: scale(1.1) rotate(180deg); 
-            box-shadow: 0 0 30px rgba(255,255,255,0.1); 
-            border-color: rgba(255,255,255,0.4);
-        }
+        .master-lock { position: absolute; bottom: 40px; right: 40px; cursor: pointer; opacity: 0.15; display: flex; align-items: center; justify-content: center; padding: 16px; border-radius: 50%; background: rgba(255,255,255,0.02); border: 1px solid var(--glass-border); transition: var(--transition-snappy); }
+        .master-lock:hover { opacity: 1; background: rgba(255,255,255,0.05); transform: scale(1.1) rotate(180deg); box-shadow: 0 0 30px rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.4); }
         .master-lock svg { width: 24px; height: 24px; fill: none; stroke: var(--text-main); stroke-width: 2; }
 
-        /* --- SIDEBAR (Scene Orquestration) --- */
-        .sidebar {
-            width: 280px; 
-            background: linear-gradient(180deg, var(--sidebar-bg) 0%, rgba(2, 6, 23, 0.95) 100%);
-            border-right: 1px solid var(--glass-border);
-            backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
-            display: flex; flex-direction: column; justify-content: space-between; 
-            position: relative; z-index: 10;
-            box-shadow: 5px 0 40px rgba(0,0,0,0.6);
-        }
+        /* SIDEBAR */
+        .sidebar { width: 280px; background: linear-gradient(180deg, var(--sidebar-bg) 0%, rgba(2, 6, 23, 0.95) 100%); border-right: 1px solid var(--glass-border); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); display: flex; flex-direction: column; justify-content: space-between; position: relative; z-index: 10; box-shadow: 5px 0 40px rgba(0,0,0,0.6); }
         
         .sidebar-header { padding: 40px 24px 20px; display: flex; align-items: center; gap: 16px; }
-        .sidebar-header .logo-icon {
-            width: 46px; height: 46px; 
-            background: linear-gradient(135deg, var(--primary), var(--purple));
-            border-radius: 12px; display: flex; align-items: center; justify-content: center;
-            font-family: var(--font-mono); font-weight: 800; color: #fff; font-size: 1.8rem;
-            box-shadow: var(--primary-glow), inset 0 2px 4px rgba(255,255,255,0.3);
-            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
-            border: 1px solid rgba(255,255,255,0.2);
-        }
+        .sidebar-header .logo-icon { width: 46px; height: 46px; background: linear-gradient(135deg, var(--primary), var(--purple)); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-family: var(--font-mono); font-weight: 800; color: #fff; font-size: 1.8rem; box-shadow: var(--primary-glow), inset 0 2px 4px rgba(255,255,255,0.3); text-shadow: 0 2px 4px rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.2); }
         .sidebar-header h2 { font-size: 1.3rem; font-weight: 800; letter-spacing: 0.2em; text-transform: uppercase; color: var(--text-bright); }
         
-        .user-badge-sidebar {
-            margin: 0 20px 30px; padding: 14px 18px; 
-            background: rgba(0, 0, 0, 0.4); border-radius: 10px;
-            font-size: 0.8rem; display: flex; align-items: center; justify-content: space-between; 
-            border: 1px solid var(--glass-border); color: var(--primary); font-weight: 700;
-            font-family: var(--font-mono); text-transform: uppercase; letter-spacing: 0.05em;
-            box-shadow: inset 0 2px 15px rgba(0,0,0,0.8);
-            transition: var(--transition-snappy);
-        }
+        .user-badge-sidebar { margin: 0 20px 30px; padding: 14px 18px; background: rgba(0, 0, 0, 0.4); border-radius: 10px; font-size: 0.8rem; display: flex; align-items: center; justify-content: space-between; border: 1px solid var(--glass-border); color: var(--primary); font-weight: 700; font-family: var(--font-mono); text-transform: uppercase; letter-spacing: 0.05em; box-shadow: inset 0 2px 15px rgba(0,0,0,0.8); transition: var(--transition-snappy); }
         .user-badge-sidebar:hover { border-color: rgba(14, 165, 233, 0.4); background: rgba(0, 0, 0, 0.6); box-shadow: var(--primary-glow), inset 0 2px 15px rgba(0,0,0,0.8); }
 
         .sidebar-menu { display: flex; flex-direction: column; gap: 8px; padding: 0 16px; flex: 1; }
-        .nav-btn {
-            background: transparent; border: 1px solid transparent; color: var(--text-muted); 
-            padding: 16px 18px; border-radius: 10px;
-            text-align: left; font-size: 0.9rem; font-weight: 600; cursor: pointer; 
-            display: flex; align-items: center; gap: 16px; letter-spacing: 0.05em;
-            transition: var(--transition-snappy); position: relative; overflow: hidden;
-        }
+        .nav-btn { background: transparent; border: 1px solid transparent; color: var(--text-muted); padding: 16px 18px; border-radius: 10px; text-align: left; font-size: 0.9rem; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 16px; letter-spacing: 0.05em; transition: var(--transition-snappy); position: relative; overflow: hidden; }
         .nav-btn svg { width: 22px; height: 22px; stroke: currentColor; fill: none; stroke-width: 2; transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
-        
-        .nav-btn:hover { 
-            color: var(--text-bright); 
-            background-color: rgba(255, 255, 255, 0.03); 
-            transform: translateX(6px);
-        }
+        .nav-btn:hover { color: var(--text-bright); background-color: rgba(255, 255, 255, 0.03); transform: translateX(6px); }
         .nav-btn:hover svg { transform: scale(1.15); stroke: var(--primary); }
-        
-        .nav-btn.active {
-            color: #fff; font-weight: 700;
-            background: linear-gradient(90deg, rgba(14, 165, 233, 0.15) 0%, transparent 100%);
-            border-left: 4px solid var(--primary); 
-            border-radius: 0 10px 10px 0;
-            box-shadow: inset 1px 0 0 var(--primary);
-        }
+        .nav-btn.active { color: #fff; font-weight: 700; background: linear-gradient(90deg, rgba(14, 165, 233, 0.15) 0%, transparent 100%); border-left: 4px solid var(--primary); border-radius: 0 10px 10px 0; box-shadow: inset 1px 0 0 var(--primary); }
         .nav-btn.active svg { stroke: var(--primary); filter: drop-shadow(0 0 8px rgba(14, 165, 233, 0.6)); }
 
-        .req-alert-badge {
-            background: var(--danger); color: white; font-size: 0.75rem; padding: 2px 8px;
-            border-radius: 12px; font-weight: 800; margin-left: auto; display: none;
-            box-shadow: var(--danger-glow); font-family: var(--font-mono);
-            animation: pulseGlow 2s infinite cubic-bezier(0.4, 0, 0.6, 1);
-        }
+        .req-alert-badge { background: var(--danger); color: white; font-size: 0.75rem; padding: 2px 8px; border-radius: 12px; font-weight: 800; margin-left: auto; display: none; box-shadow: var(--danger-glow); font-family: var(--font-mono); animation: pulseGlow 2s infinite cubic-bezier(0.4, 0, 0.6, 1); }
 
-        .sidebar-footer {
-            padding: 30px 24px; font-size: 0.65rem; color: #475569; text-align: center;
-            border-top: 1px solid var(--glass-border); letter-spacing: 0.15em;
-            background: rgba(2, 6, 23, 0.5); font-family: var(--font-mono); font-weight: 700;
-        }
+        .sidebar-footer { padding: 30px 24px; font-size: 0.65rem; color: #475569; text-align: center; border-top: 1px solid var(--glass-border); letter-spacing: 0.15em; background: rgba(2, 6, 23, 0.5); font-family: var(--font-mono); font-weight: 700; }
 
-        /* --- CONTEÚDO PRINCIPAL (Viewport Execution) --- */
-        .main-content {
-            flex: 1; padding: 50px 70px; overflow-y: auto; 
-            position: relative; z-index: 1;
-        }
-        
-        /* Custom Scrollbar */
+        /* MAIN VIEWPORT */
+        .main-content { flex: 1; padding: 50px 70px; overflow-y: auto; position: relative; z-index: 1; }
         .main-content::-webkit-scrollbar { width: 8px; height: 8px; }
         .main-content::-webkit-scrollbar-track { background: rgba(2, 6, 23, 0.8); }
         .main-content::-webkit-scrollbar-thumb { background: rgba(51, 65, 85, 0.8); border-radius: 4px; border: 1px solid rgba(2, 6, 23, 1); }
         .main-content::-webkit-scrollbar-thumb:hover { background: var(--primary); }
 
         .section { display: none; }
-        .section.active { 
-            display: block; 
-            animation: sectionEntrance 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; 
-        }
+        .section.active { display: block; animation: sectionEntrance 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
 
-        .section-title { 
-            font-size: 2.2rem; font-weight: 800; letter-spacing: -0.02em; 
-            margin-bottom: 8px; text-shadow: 0 10px 30px rgba(0,0,0,0.8); 
-            background: linear-gradient(to right, #ffffff, #94a3b8);
-            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-        }
-        .section-subtitle { 
-            font-size: 0.95rem; color: var(--text-muted); margin-bottom: 50px; 
-            font-family: var(--font-mono); text-transform: uppercase; letter-spacing: 0.1em; font-weight: 600;
-        }
+        .section-title { font-size: 2.2rem; font-weight: 800; letter-spacing: -0.02em; margin-bottom: 8px; text-shadow: 0 10px 30px rgba(0,0,0,0.8); background: linear-gradient(to right, #ffffff, #94a3b8); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .section-subtitle { font-size: 0.95rem; color: var(--text-muted); margin-bottom: 30px; font-family: var(--font-mono); text-transform: uppercase; letter-spacing: 0.1em; font-weight: 600; }
 
-        /* KPI Cards (Metrics Render) */
-        .kpi-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 24px; margin-bottom: 50px; }
-        .kpi-card {
-            background: linear-gradient(135deg, rgba(30, 41, 59, 0.5) 0%, rgba(15, 23, 42, 0.8) 100%); 
-            padding: 30px 24px; border-radius: 16px;
-            border: 1px solid var(--glass-border); 
-            backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
-            display: flex; flex-direction: column; gap: 16px;
-            box-shadow: var(--shadow-ambient), inset 0 1px 0 rgba(255,255,255,0.05);
-            position: relative; overflow: hidden;
-            transition: var(--transition-heavy);
-        }
-        .kpi-card:hover { 
-            transform: translateY(-6px); 
-            box-shadow: 0 20px 40px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.1); 
-            background: linear-gradient(135deg, rgba(51, 65, 85, 0.6) 0%, rgba(15, 23, 42, 0.9) 100%); 
-        }
-        
-        .kpi-card::after {
-            content: ''; position: absolute; top: 0; left: 0; width: 4px; height: 100%;
-            border-radius: 4px 0 0 4px; transition: width 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-        }
+        /* KPI Cards */
+        .kpi-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 24px; margin-bottom: 30px; }
+        .kpi-card { background: linear-gradient(135deg, rgba(30, 41, 59, 0.5) 0%, rgba(15, 23, 42, 0.8) 100%); padding: 30px 24px; border-radius: 16px; border: 1px solid var(--glass-border); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); display: flex; flex-direction: column; gap: 16px; box-shadow: var(--shadow-ambient), inset 0 1px 0 rgba(255,255,255,0.05); position: relative; overflow: hidden; transition: var(--transition-heavy); }
+        .kpi-card:hover { transform: translateY(-6px); box-shadow: 0 20px 40px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.1); background: linear-gradient(135deg, rgba(51, 65, 85, 0.6) 0%, rgba(15, 23, 42, 0.9) 100%); }
+        .kpi-card::after { content: ''; position: absolute; top: 0; left: 0; width: 4px; height: 100%; border-radius: 4px 0 0 4px; transition: width 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
         .kpi-card:hover::after { width: 8px; }
         .kpi-card:nth-child(1)::after { background: var(--text-muted); }
         .kpi-card:nth-child(2)::after { background: var(--accent); box-shadow: var(--accent-glow); }
         .kpi-card:nth-child(3)::after { background: var(--primary); box-shadow: var(--primary-glow); }
         .kpi-card:nth-child(4)::after { background: var(--success); box-shadow: var(--success-glow); }
-
         .kpi-card h3 { font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.15em; font-weight: 700; font-family: var(--font-mono);}
         .kpi-card p { font-size: 3.5rem; font-weight: 800; color: var(--text-bright); line-height: 1; font-family: var(--font-mono); text-shadow: 0 4px 20px rgba(0,0,0,0.5); letter-spacing: -0.05em;}
 
-        /* General Surface Cards */
-        .card { 
-            background: rgba(15, 23, 42, 0.6); border-radius: 16px; 
-            border: 1px solid var(--glass-border); padding: 35px; 
-            margin-bottom: 40px; backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
-            box-shadow: 0 20px 50px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.02);
-        }
-        .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; padding-bottom: 20px; border-bottom: 1px solid var(--glass-border);}
+        /* Pipeline Visualizer */
+        .pipeline-visualizer { background: rgba(15, 23, 42, 0.6); border: 1px solid var(--glass-border); border-radius: 16px; padding: 30px; margin-bottom: 50px; }
+        .pipeline-visualizer h3 { font-family: var(--font-mono); text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-muted); font-size: 1rem; margin-bottom: 20px; }
+        .pipeline-bar-container { width: 100%; height: 24px; background: rgba(0,0,0,0.5); border-radius: 12px; display: flex; overflow: hidden; box-shadow: inset 0 2px 10px rgba(0,0,0,0.8); border: 1px solid rgba(255,255,255,0.05); }
+        .pipeline-segment { height: 100%; transition: width 1s cubic-bezier(0.16, 1, 0.3, 1); display: flex; align-items: center; justify-content: center; font-size: 0.7rem; font-weight: bold; color: rgba(255,255,255,0.9); text-shadow: 0 1px 2px rgba(0,0,0,0.8); }
+        .seg-pendente { background: linear-gradient(90deg, #d97706, #f59e0b); box-shadow: 0 0 15px rgba(245, 158, 11, 0.4); }
+        .seg-oc { background: linear-gradient(90deg, #0284c7, #0ea5e9); box-shadow: 0 0 15px rgba(14, 165, 233, 0.4); }
+        .seg-entregue { background: linear-gradient(90deg, #059669, #10b981); box-shadow: 0 0 15px rgba(16, 185, 129, 0.4); }
+        .pipeline-legend { display: flex; gap: 20px; margin-top: 15px; font-size: 0.8rem; font-family: var(--font-mono); font-weight: 600; }
+        .legend-item { display: flex; align-items: center; gap: 8px; color: var(--text-muted); }
+        .legend-color { width: 12px; height: 12px; border-radius: 3px; }
+
+        .card { background: rgba(15, 23, 42, 0.6); border-radius: 16px; border: 1px solid var(--glass-border); padding: 35px; margin-bottom: 40px; backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); box-shadow: 0 20px 50px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.02); }
+        .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; padding-bottom: 20px; border-bottom: 1px solid var(--glass-border); flex-wrap: wrap; gap: 20px;}
         .card-header h3 { font-family: var(--font-mono); text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-muted); font-size: 1rem;}
 
-        /* Botões PBR (Physical Based Interactions) */
-        .btn {
-            background: linear-gradient(180deg, var(--primary) 0%, #0284c7 100%); 
-            color: #fff; border: 1px solid rgba(255,255,255,0.1); padding: 12px 24px;
-            border-radius: 8px; cursor: pointer; font-size: 0.85rem; font-weight: 700; 
-            display: inline-flex; align-items: center; gap: 10px; font-family: var(--font-ui);
-            text-transform: uppercase; letter-spacing: 0.05em;
-            transition: var(--transition-snappy);
-            box-shadow: 0 4px 15px rgba(14, 165, 233, 0.3), inset 0 1px 0 rgba(255,255,255,0.3);
-            text-shadow: 0 1px 2px rgba(0,0,0,0.3);
-            position: relative; overflow: hidden;
-        }
-        .btn::after {
-            content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background: linear-gradient(to bottom, rgba(255,255,255,0.2), transparent);
-            opacity: 0; transition: opacity 0.3s;
-        }
+        /* Filters Toolbar */
+        .filters-toolbar { display: flex; gap: 16px; flex-wrap: wrap; align-items: center; background: rgba(2, 6, 23, 0.5); padding: 12px; border-radius: 12px; border: 1px solid var(--glass-border); margin-bottom: 24px; }
+        .filter-input-group { display: flex; align-items: center; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; padding: 0 12px; transition: var(--transition-snappy); flex: 1; min-width: 200px; }
+        .filter-input-group:focus-within { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.15); }
+        .filter-input-group svg { color: var(--text-muted); width: 16px; height: 16px; }
+        .filter-input-group input { background: transparent; border: none; color: var(--text-bright); padding: 10px; width: 100%; font-family: var(--font-ui); font-size: 0.85rem; outline: none; }
+        .filter-select { background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(255,255,255,0.1); color: var(--text-bright); padding: 10px 16px; border-radius: 8px; font-family: var(--font-mono); font-size: 0.8rem; outline: none; cursor: pointer; transition: var(--transition-snappy); }
+        .filter-select:focus { border-color: var(--primary); }
+
+        /* Botões */
+        .btn { background: linear-gradient(180deg, var(--primary) 0%, #0284c7 100%); color: #fff; border: 1px solid rgba(255,255,255,0.1); padding: 12px 24px; border-radius: 8px; cursor: pointer; font-size: 0.85rem; font-weight: 700; display: inline-flex; align-items: center; gap: 10px; font-family: var(--font-ui); text-transform: uppercase; letter-spacing: 0.05em; transition: var(--transition-snappy); box-shadow: 0 4px 15px rgba(14, 165, 233, 0.3), inset 0 1px 0 rgba(255,255,255,0.3); text-shadow: 0 1px 2px rgba(0,0,0,0.3); position: relative; overflow: hidden; }
+        .btn::after { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(to bottom, rgba(255,255,255,0.2), transparent); opacity: 0; transition: opacity 0.3s; }
         .btn:hover { transform: translateY(-2px); box-shadow: 0 10px 25px rgba(14, 165, 233, 0.5), inset 0 1px 0 rgba(255,255,255,0.4); }
         .btn:hover::after { opacity: 1; }
         .btn:active { transform: translateY(1px); box-shadow: 0 2px 5px rgba(14, 165, 233, 0.3), inset 0 2px 4px rgba(0,0,0,0.3); }
@@ -404,58 +218,32 @@
         .btn-secondary { background: rgba(30, 41, 59, 0.6); color: var(--text-main); border: 1px solid var(--glass-border); box-shadow: inset 0 1px 0 rgba(255,255,255,0.05); }
         .btn-secondary:hover { background: rgba(51, 65, 85, 0.8); border-color: rgba(255,255,255,0.2); box-shadow: 0 8px 20px rgba(0,0,0,0.4); }
         
-        .btn-action { 
-            padding: 8px 14px; font-size: 0.75rem; border-radius: 6px; background: rgba(2, 6, 23, 0.6); 
-            color: var(--text-muted); border: 1px solid var(--glass-border); cursor: pointer; 
-            display: inline-flex; align-items: center; gap: 8px; font-family: var(--font-ui);
-            transition: var(--transition-snappy); text-decoration: none; font-weight: 600;
-        }
+        .btn-action { padding: 8px 14px; font-size: 0.75rem; border-radius: 6px; background: rgba(2, 6, 23, 0.6); color: var(--text-muted); border: 1px solid var(--glass-border); cursor: pointer; display: inline-flex; align-items: center; gap: 8px; font-family: var(--font-ui); transition: var(--transition-snappy); text-decoration: none; font-weight: 600; }
         .btn-action:hover { border-color: var(--text-main); color: var(--text-bright); background: rgba(30, 41, 59, 0.8); transform: translateY(-2px); box-shadow: 0 6px 15px rgba(0,0,0,0.4);}
         
         .btn-req { color: var(--accent); border-color: rgba(245, 158, 11, 0.3); background: rgba(245, 158, 11, 0.05); }
         .btn-req:hover { background: var(--accent); color: #fff; border-color: var(--accent); box-shadow: var(--accent-glow); }
         .btn-delete { color: var(--danger); border-color: rgba(239, 68, 68, 0.3); background: rgba(239, 68, 68, 0.05);}
         .btn-delete:hover { background: var(--danger); color: #fff; border-color: var(--danger); box-shadow: var(--danger-glow); }
-        .btn-sync { color: var(--success); border-color: rgba(16, 185, 129, 0.3); background: rgba(16, 185, 129, 0.05);}
-        .btn-sync:hover { background: var(--success); color: #fff; border-color: var(--success); box-shadow: var(--success-glow); }
+        .btn-export { color: #fff; border-color: rgba(16, 185, 129, 0.5); background: linear-gradient(180deg, #10b981 0%, #059669 100%); box-shadow: 0 4px 15px rgba(16, 185, 129, 0.2); }
+        .btn-export:hover { box-shadow: 0 8px 25px rgba(16, 185, 129, 0.4); border-color: #34d399;}
 
-        /* Data Grid (Telemetry Render) */
-        .table-responsive { 
-            overflow-x: auto; border-radius: 12px; border: 1px solid var(--glass-border); 
-            background: rgba(2, 6, 23, 0.8); box-shadow: inset 0 5px 30px rgba(0,0,0,0.8);
-        }
+        /* Data Grid */
+        .table-responsive { overflow-x: auto; border-radius: 12px; border: 1px solid var(--glass-border); background: rgba(2, 6, 23, 0.8); box-shadow: inset 0 5px 30px rgba(0,0,0,0.8); }
         table { width: 100%; border-collapse: collapse; font-size: 0.85rem; text-align: left; }
         th, td { padding: 18px 20px; border-bottom: 1px solid rgba(255,255,255,0.03); vertical-align: middle; }
-        
-        th { 
-            background-color: rgba(9, 15, 30, 0.95); color: #94a3b8; 
-            font-weight: 700; text-transform: uppercase; font-size: 0.75rem; 
-            letter-spacing: 0.1em; position: sticky; top: 0; z-index: 5;
-            backdrop-filter: blur(8px); border-bottom: 1px solid rgba(255,255,255,0.1);
-        }
-        
-        /* Row Hover Experience */
-        tr { 
-            transition: var(--transition-snappy); 
-            animation: rowIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards; opacity: 0;
-            background: transparent;
-        }
+        th { background-color: rgba(9, 15, 30, 0.95); color: #94a3b8; font-weight: 700; text-transform: uppercase; font-size: 0.75rem; letter-spacing: 0.1em; position: sticky; top: 0; z-index: 5; backdrop-filter: blur(8px); border-bottom: 1px solid rgba(255,255,255,0.1); }
+        tr { transition: var(--transition-snappy); animation: rowIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards; opacity: 0; background: transparent; }
         tr:nth-child(1) { animation-delay: 0.05s; } tr:nth-child(2) { animation-delay: 0.1s; } tr:nth-child(3) { animation-delay: 0.15s; }
         tr:last-child td { border-bottom: none; }
-        
-        tr:hover { 
-            background: linear-gradient(90deg, rgba(14, 165, 233, 0.08) 0%, rgba(2, 6, 23, 0.4) 100%);
-            box-shadow: inset 3px 0 0 var(--primary);
-        }
-        /* Elevate the row subtly via pseudo element to avoid table collapse bugs */
+        tr:hover { background: linear-gradient(90deg, rgba(14, 165, 233, 0.08) 0%, rgba(2, 6, 23, 0.4) 100%); box-shadow: inset 3px 0 0 var(--primary); }
         tr:hover td { border-bottom-color: transparent; }
         
-        /* Fontes de Dados Críticos (Telemetry Style) */
         td.data-mono { font-family: var(--font-mono); font-weight: 600; letter-spacing: 0.05em; }
         td.data-highlight { font-family: var(--font-mono); color: var(--primary); font-weight: 800; font-size: 1rem; text-shadow: var(--primary-glow); }
         td.data-main { font-weight: 600; color: var(--text-bright); }
 
-        /* Componentes de Estado */
+        /* Status & Components */
         .cat-badge { padding: 4px 10px; border-radius: 6px; font-size: 0.7rem; font-weight: 800; text-transform: uppercase; border: 1px solid transparent; letter-spacing: 0.08em; font-family: var(--font-mono);}
         .cat-mecanica { color: var(--tag-mecanica); border-color: rgba(14, 165, 233, 0.4); background: rgba(14, 165, 233, 0.1); text-shadow: 0 0 10px rgba(14,165,233,0.3);}
         .cat-civil { color: var(--tag-civil); border-color: rgba(249, 115, 22, 0.4); background: rgba(249, 115, 22, 0.1); text-shadow: 0 0 10px rgba(249,115,22,0.3);}
@@ -463,45 +251,37 @@
         .cat-qualidade { color: var(--tag-qualidade); border-color: rgba(225, 29, 72, 0.4); background: rgba(225, 29, 72, 0.1); text-shadow: 0 0 10px rgba(225,29,72,0.3);}
 
         .status-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 10px; box-shadow: 0 0 10px currentColor; }
-        .status-pendente .status-dot { background-color: var(--accent); }
         .status-pendente { color: var(--accent); font-weight: 700; text-shadow: 0 0 8px rgba(245,158,11,0.3); font-family: var(--font-mono); text-transform: uppercase; font-size:0.75rem;}
-        .status-oc .status-dot { background-color: var(--primary); }
         .status-oc { color: var(--primary); font-weight: 700; text-shadow: 0 0 8px rgba(14,165,233,0.3); font-family: var(--font-mono); text-transform: uppercase; font-size:0.75rem;}
-        .status-parcial .status-dot { background-color: var(--purple); }
+        /* NOVO STATUS: OC PARCIAL */
+        .status-oc-parcial { color: var(--cyan); font-weight: 700; text-shadow: 0 0 8px rgba(6,182,212,0.3); font-family: var(--font-mono); text-transform: uppercase; font-size:0.75rem;}
+        .status-oc-parcial .status-dot { background-color: var(--cyan); }
+        
         .status-parcial { color: var(--purple); font-weight: 700; text-shadow: 0 0 8px rgba(139,92,246,0.3); font-family: var(--font-mono); text-transform: uppercase; font-size:0.75rem;}
-        .status-entregue .status-dot { background-color: var(--success); }
         .status-entregue { color: var(--success); font-weight: 700; text-shadow: 0 0 8px rgba(16,185,129,0.3); font-family: var(--font-mono); text-transform: uppercase; font-size:0.75rem;}
         
         .pendencias-text { display: block; font-size: 0.75rem; color: #e9d5ff; margin-top: 8px; max-width: 220px; line-height: 1.5; font-weight: 500; background: rgba(139, 92, 246, 0.15); padding: 6px 10px; border-radius: 6px; border: 1px solid rgba(139, 92, 246, 0.3); box-shadow: inset 0 2px 5px rgba(0,0,0,0.2);}
 
-        /* Termômetro SLA */
+        .inline-status-select { background: rgba(2, 6, 23, 0.8); border: 1px solid var(--glass-border); color: inherit; font-family: var(--font-mono); font-size: 0.75rem; font-weight: 700; padding: 4px 8px; border-radius: 4px; outline: none; cursor: pointer; transition: all 0.2s; }
+        .inline-status-select:focus, .inline-status-select:hover { border-color: currentColor; box-shadow: 0 0 10px currentColor; }
+
         .sla-badge { padding: 4px 10px; border-radius: 6px; font-size: 0.75rem; font-weight: 800; display: inline-block; white-space: nowrap; font-family: var(--font-mono); letter-spacing: 0.05em;}
         .sla-ok { background: rgba(16, 185, 129, 0.1); color: var(--success); border: 1px solid rgba(16, 185, 129, 0.3); }
         .sla-warn { background: rgba(245, 158, 11, 0.1); color: var(--accent); border: 1px solid rgba(245, 158, 11, 0.3); }
         .sla-late { background: rgba(239, 68, 68, 0.1); color: var(--danger); border: 1px solid rgba(239, 68, 68, 0.4); animation: pulseGlowDanger 2s infinite; text-shadow: 0 0 10px rgba(239,68,68,0.5);}
 
-        /* Bot de automação tag */
         .bot-tag { display: inline-flex; align-items: center; gap: 6px; font-size: 0.75rem; color: #10b981; background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3); padding: 4px 10px; border-radius: 12px; font-weight: 700; text-shadow: 0 0 10px rgba(16,185,129,0.3); font-family: var(--font-mono); text-transform: uppercase;}
 
-        /* Forms PBR Input */
+        /* Forms */
         .form-container { background: rgba(2, 6, 23, 0.8); border: 1px solid var(--glass-border); padding: 40px; border-radius: 16px; margin-bottom: 40px; box-shadow: inset 0 5px 30px rgba(0,0,0,0.8); animation: slideDownFade 0.4s cubic-bezier(0.16, 1, 0.3, 1);}
         .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 24px; margin-bottom: 30px; }
         .form-group { display: flex; flex-direction: column; }
         .form-group label { font-size: 0.75rem; margin-bottom: 10px; color: var(--text-muted); font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; font-family: var(--font-mono);}
-        .form-group input, .form-group select, .form-group textarea { 
-            padding: 14px 18px; background: rgba(15, 23, 42, 0.9); border: 1px solid rgba(255,255,255,0.08); 
-            border-radius: 8px; color: var(--text-bright); font-size: 0.95rem; transition: var(--transition-snappy);
-            box-shadow: inset 0 2px 10px rgba(0,0,0,0.5); font-family: var(--font-ui); font-weight: 500;
-        }
-        .form-group input:focus, .form-group select:focus, .form-group textarea:focus { 
-            outline: none; border-color: var(--primary); background: rgba(15, 23, 42, 1);
-            box-shadow: 0 0 0 4px rgba(14, 165, 233, 0.15), inset 0 2px 10px rgba(0,0,0,0.5);
-            transform: translateY(-2px);
-        }
+        .form-group input, .form-group select, .form-group textarea { padding: 14px 18px; background: rgba(15, 23, 42, 0.9); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; color: var(--text-bright); font-size: 0.95rem; transition: var(--transition-snappy); box-shadow: inset 0 2px 10px rgba(0,0,0,0.5); font-family: var(--font-ui); font-weight: 500;}
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus { outline: none; border-color: var(--primary); background: rgba(15, 23, 42, 1); box-shadow: 0 0 0 4px rgba(14, 165, 233, 0.15), inset 0 2px 10px rgba(0,0,0,0.5); transform: translateY(-2px); }
         .full-width { grid-column: 1 / -1; }
         .form-actions { display: flex; justify-content: flex-end; gap: 16px; padding-top: 25px; border-top: 1px solid var(--glass-border); margin-top: 10px;}
         
-        /* Modificadores de Estado Logico (Intocável) */
         .admin-only { display: none !important; }
         body.admin-authenticated .admin-only { display: flex !important; }
         body.admin-authenticated .admin-only-block { display: block !important; }
@@ -509,29 +289,16 @@
         .admin-only-block, .admin-only-cell { display: none !important; }
         
         .action-buttons-group { display: flex; gap: 10px; justify-content: flex-start; align-items: center; flex-wrap: wrap;}
-        
         .req-card { border-left: 4px solid var(--accent); background: linear-gradient(90deg, rgba(245, 158, 11, 0.08) 0%, transparent 100%); }
         .req-card:hover { transform: translateX(5px); background: linear-gradient(90deg, rgba(245, 158, 11, 0.15) 0%, rgba(2, 6, 23, 0.8) 100%); border-left-width: 6px; }
 
-        /* --- GPU ACCELERATED KEYFRAMES --- */
         @keyframes slideDownFade { from { opacity: 0; transform: translateY(-40px); } to { opacity: 1; transform: translateY(0); } }
         @keyframes cardEntrance { from { opacity: 0; transform: translateY(60px) scale(0.95); } to { opacity: 1; transform: translateY(0) scale(1); } }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         @keyframes sectionEntrance { from { opacity: 0; transform: scale(0.99) translateY(15px); } to { opacity: 1; transform: scale(1) translateY(0); } }
         @keyframes rowIn { from { opacity: 0; transform: translateX(-20px); } to { opacity: 1; transform: translateX(0); } }
-        
-        @keyframes pulseGlow { 
-            0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); } 
-            70% { box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); } 
-            100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); } 
-        }
-        @keyframes pulseGlowDanger { 
-            0% { border-color: rgba(239, 68, 68, 0.4); box-shadow: 0 0 8px rgba(239, 68, 68, 0.3); } 
-            50% { border-color: rgba(239, 68, 68, 0.9); box-shadow: 0 0 20px rgba(239, 68, 68, 0.6); } 
-            100% { border-color: rgba(239, 68, 68, 0.4); box-shadow: 0 0 8px rgba(239, 68, 68, 0.3); } 
-        }
+        @keyframes pulseGlow { 0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); } 70% { box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); } 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); } }
+        @keyframes pulseGlowDanger { 0% { border-color: rgba(239, 68, 68, 0.4); box-shadow: 0 0 8px rgba(239, 68, 68, 0.3); } 50% { border-color: rgba(239, 68, 68, 0.9); box-shadow: 0 0 20px rgba(239, 68, 68, 0.6); } 100% { border-color: rgba(239, 68, 68, 0.4); box-shadow: 0 0 8px rgba(239, 68, 68, 0.3); } }
 
-        /* Responsividade mantendo o layout intacto */
         @media (max-width: 1024px) {
             body { flex-direction: column; }
             .sidebar { width: 100%; height: auto; flex-direction: row; flex-wrap: wrap; align-items: center; padding: 0; border-right: none; border-bottom: 1px solid var(--glass-border);}
@@ -548,47 +315,34 @@
 </head>
 <body>
 
-    <!-- MARCA D'ÁGUA GLOBAL (HARDWARE SIGNATURE) -->
-    <div class="watermark-global">
-        ENG. SAMUEL VITOR M. SANTOS <span>//</span> ARCHITECTURE & SYSTEMS
-    </div>
+    <div class="watermark-global">ENG. SAMUEL VITOR M. SANTOS <span>//</span> ARCHITECTURE & SYSTEMS v7.1</div>
 
-    <!-- OVERLAY DO PORTAL -->
     <div id="portal-screen">
         <div class="portal-header">
             <h1>BRAZO ENGENHARIA</h1>
             <p>Selecione seu núcleo técnico para acessar o espelho de requisições</p>
         </div>
-        
         <div class="portal-grid">
             <div class="portal-card card-mec" onclick="enterAsViewer('MECÂNICA')">
-                <div class="icon-box">
-                    <svg viewBox="0 0 24 24" stroke="currentColor" fill="none"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
-                </div><h3>MECÂNICA</h3>
+                <div class="icon-box"><svg viewBox="0 0 24 24" stroke="currentColor" fill="none"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg></div>
+                <h3>MECÂNICA</h3>
             </div>
             <div class="portal-card card-civ" onclick="enterAsViewer('CIVIL')">
-                <div class="icon-box">
-                    <svg viewBox="0 0 24 24" stroke="currentColor" fill="none"><path d="M3 21h18"></path><path d="M19 21v-4"></path><path d="M19 17a2 2 0 0 0-2-2H7a2 2 0 0 0-2 2v4"></path><path d="M14 15V7a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v8"></path><path d="M10 9h2"></path></svg>
-                </div><h3>CIVIL</h3>
+                <div class="icon-box"><svg viewBox="0 0 24 24" stroke="currentColor" fill="none"><path d="M3 21h18"></path><path d="M19 21v-4"></path><path d="M19 17a2 2 0 0 0-2-2H7a2 2 0 0 0-2 2v4"></path><path d="M14 15V7a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v8"></path><path d="M10 9h2"></path></svg></div>
+                <h3>CIVIL</h3>
             </div>
             <div class="portal-card card-ele" onclick="enterAsViewer('ELÉTRICA')">
-                <div class="icon-box">
-                    <svg viewBox="0 0 24 24" stroke="currentColor" fill="none"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"></path></svg>
-                </div><h3>ELÉTRICA</h3>
+                <div class="icon-box"><svg viewBox="0 0 24 24" stroke="currentColor" fill="none"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"></path></svg></div>
+                <h3>ELÉTRICA</h3>
             </div>
             <div class="portal-card card-qua" onclick="enterAsViewer('QUALIDADE / SEGURANÇA')">
-                <div class="icon-box">
-                    <svg viewBox="0 0 24 24" stroke="currentColor" fill="none"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
-                </div><h3>QUALIDADE / SEG.</h3>
+                <div class="icon-box"><svg viewBox="0 0 24 24" stroke="currentColor" fill="none"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg></div>
+                <h3>QUALIDADE / SEG.</h3>
             </div>
         </div>
-
-        <div class="master-lock" onclick="authenticateAdmin()" title="Acesso Restrito ADMIN">
-            <svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
-        </div>
+        <div class="master-lock" onclick="authenticateAdmin()" title="Acesso Restrito ADMIN"><svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg></div>
     </div>
 
-    <!-- SIDEBAR -->
     <div class="sidebar">
         <div>
             <div class="sidebar-header">
@@ -602,38 +356,35 @@
                 </button>
             </div>
             <div class="sidebar-menu">
-                <button class="nav-btn active" onclick="showSection('dashboard')">
-                    <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
-                    Painel Central
-                </button>
-                <button class="nav-btn" onclick="showSection('rms')">
-                    <svg viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
-                    Espelho de RMs
-                </button>
-                <button class="nav-btn admin-only-block" id="menu-obs-btn" onclick="showSection('obs')">
-                    <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
-                    Relatórios & Histórico
-                </button>
-                <button class="nav-btn admin-only-block" id="menu-req-btn" onclick="showSection('solicitacoes')">
-                    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
-                    Alertas de Previsão <span id="req-count-badge" class="req-alert-badge">0</span>
-                </button>
+                <button class="nav-btn active" onclick="showSection('dashboard')"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg> Painel Central</button>
+                <button class="nav-btn" onclick="showSection('rms')"><svg viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg> Espelho de RMs</button>
+                <button class="nav-btn admin-only-block" onclick="showSection('obs')"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg> Relatórios & Histórico</button>
+                <button class="nav-btn admin-only-block" onclick="showSection('solicitacoes')"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg> Alertas de Previsão <span id="req-count-badge" class="req-alert-badge">0</span></button>
             </div>
         </div>
-        <div class="sidebar-footer">v6.4 ENGINE BUILD</div>
+        <div class="sidebar-footer">v7.1 ENGINE BUILD (DATA/UX)</div>
     </div>
 
-    <!-- MAIN VIEWPORT -->
     <div class="main-content">
-        
         <div id="dashboard" class="section active">
             <h1 class="section-title">Painel de Controle</h1>
             <p class="section-subtitle" id="dash-context-subtitle">Indicadores operacionais</p>
+            
             <div class="kpi-container">
                 <div class="kpi-card"><h3>RMs Cadastradas</h3><p id="kpi-total">0</p></div>
                 <div class="kpi-card"><h3>Pendentes</h3><p id="kpi-pendente" style="color:var(--accent)">0</p></div>
-                <div class="kpi-card"><h3>OCs Emitidas</h3><p id="kpi-oc" style="color:var(--primary)">0</p></div>
+                <div class="kpi-card"><h3>OCs Emitidas / Parciais</h3><p id="kpi-oc" style="color:var(--primary)">0</p></div>
                 <div class="kpi-card"><h3>Materiais Entregues</h3><p id="kpi-entregue" style="color:var(--success)">0</p></div>
+            </div>
+
+            <div class="pipeline-visualizer">
+                <h3>Pipeline Health (RMs Status Distribution)</h3>
+                <div class="pipeline-bar-container" id="pipeline-bar"></div>
+                <div class="pipeline-legend">
+                    <div class="legend-item"><div class="legend-color" style="background:var(--accent)"></div> Pendentes (<span id="perc-pendente">0%</span>)</div>
+                    <div class="legend-item"><div class="legend-color" style="background:var(--primary)"></div> Em Andamento / OC (<span id="perc-oc">0%</span>)</div>
+                    <div class="legend-item"><div class="legend-color" style="background:var(--success)"></div> Finalizadas (<span id="perc-entregue">0%</span>)</div>
+                </div>
             </div>
         </div>
 
@@ -645,6 +396,10 @@
                 <div class="card-header">
                     <h3>Registros Ativos em Banco</h3>
                     <div style="display: flex; gap: 16px; flex-wrap: wrap;">
+                        <button class="btn btn-export" onclick="exportFilteredDataToCSV()">
+                            <svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                            Exportar Excel (.CSV)
+                        </button>
                         <button class="btn btn-secondary admin-only btn-sync" onclick="syncInitialData()">
                             <svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 2v6h-6"></path><path d="M3 12a9 9 0 0 1 15-6.7L21 8"></path><path d="M3 22v-6h6"></path><path d="M21 12a9 9 0 0 1-15 6.7L3 16"></path></svg>
                             Sincronizar Arquivo Base
@@ -654,6 +409,21 @@
                             Nova Requisição (RM)
                         </button>
                     </div>
+                </div>
+
+                <div class="filters-toolbar">
+                    <div class="filter-input-group">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                        <input type="text" id="search-input" placeholder="Buscar por RM, Descrição ou Solicitante..." oninput="applyFilters()">
+                    </div>
+                    <select class="filter-select" id="status-filter" onchange="applyFilters()">
+                        <option value="">Todos os Status</option>
+                        <option value="Pendente">Pendente</option>
+                        <option value="OC Parcial">OC Parcial</option>
+                        <option value="OC Emitida">OC Emitida</option>
+                        <option value="Entregue Parcialmente">Entregue Parcialmente</option>
+                        <option value="Entregue">Entregue</option>
+                    </select>
                 </div>
 
                 <div id="rm-form-container" class="form-container" style="display: none;">
@@ -677,12 +447,13 @@
                                 <label>Situação Global do Pedido</label>
                                 <select id="rm-status" onchange="togglePendencias()">
                                     <option value="Pendente">Pendente</option>
+                                    <option value="OC Parcial">OC Parcial (Múltiplos Pedidos)</option>
                                     <option value="OC Emitida">OC Emitida</option>
                                     <option value="Entregue Parcialmente">Entregue Parcialmente</option>
                                     <option value="Entregue">Entregue</option>
                                 </select>
                             </div>
-                            <div class="form-group"><label>Documento OC</label><input type="text" id="rm-oc"></div>
+                            <div class="form-group"><label>Documento(s) OC</label><input type="text" id="rm-oc" placeholder="Ex: 2451, 2452"></div>
 
                             <div class="form-group full-width" id="pendencias-container" style="display: none; background: rgba(139, 92, 246, 0.08); padding: 25px; border-radius: 12px; border: 1px solid rgba(139, 92, 246, 0.4); box-shadow: inset 0 5px 20px rgba(0,0,0,0.5);">
                                 <label style="color: #d8b4fe; display:flex; align-items:center; gap:10px; font-size:0.8rem;">
@@ -725,15 +496,10 @@
         <div id="solicitacoes" class="section">
             <h1 class="section-title">Alertas de Previsão</h1>
             <p class="section-subtitle">Requisições marcadas para verificação imediata de deadline</p>
-            
             <div class="card">
                 <div class="table-responsive">
                     <table>
-                        <thead>
-                            <tr>
-                                <th>Data da Cobrança</th><th>RM Solicitada</th><th>Líder Solicitante</th><th>Ação de Resolução</th>
-                            </tr>
-                        </thead>
+                        <thead><tr><th>Data da Cobrança</th><th>RM Solicitada</th><th>Líder Solicitante</th><th>Ação de Resolução</th></tr></thead>
                         <tbody id="req-table-body"></tbody>
                     </table>
                 </div>
@@ -743,29 +509,17 @@
         <div id="obs" class="section">
             <h1 class="section-title">Auditoria de Observações</h1>
             <p class="section-subtitle">Log de eventos e pareceres técnicos atrelados</p>
-            
             <div class="card">
                 <form id="obs-form" onsubmit="saveObs(event)" class="form-container">
                     <div class="form-grid">
-                        <div class="form-group full-width">
-                            <label>Vínculo com Documento Raiz (RM)</label>
-                            <select id="obs-rm-select" required></select>
-                        </div>
-                        <div class="form-group full-width">
-                            <label>Despacho Técnico / Parecer</label>
-                            <textarea id="obs-text" rows="4" required></textarea>
-                        </div>
+                        <div class="form-group full-width"><label>Vínculo com Documento Raiz (RM)</label><select id="obs-rm-select" required></select></div>
+                        <div class="form-group full-width"><label>Despacho Técnico / Parecer</label><textarea id="obs-text" rows="4" required></textarea></div>
                     </div>
                     <div class="form-actions"><button type="submit" class="btn">Gravar no Log</button></div>
                 </form>
-
                 <div class="table-responsive">
                     <table>
-                        <thead>
-                            <tr>
-                                <th>Carimbo de Tempo</th><th>Referência</th><th>Parecer Registrado</th><th class="admin-only-cell">Ações de Log</th>
-                            </tr>
-                        </thead>
+                        <thead><tr><th>Carimbo de Tempo</th><th>Referência</th><th>Parecer Registrado</th><th class="admin-only-cell">Ações de Log</th></tr></thead>
                         <tbody id="obs-table-body"></tbody>
                     </table>
                 </div>
@@ -773,10 +527,10 @@
         </div>
     </div>
 
-    <!-- MÓDULO JS ORIGINAL (INTOCÁVEL - FLUXO C++) -->
+    <!-- FIREBASE C++ LOGIC BINDING -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-app.js";
-        import { getDatabase, ref, onValue, set, push, remove } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-database.js";
+        import { getDatabase, ref, onValue, set, push, remove, update } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-database.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyAqE_1g4Sf7_SLsbQJvWM7l-MNakV7LrFg",
@@ -820,14 +574,16 @@
             await set(ref(db, 'rms/' + rmId), rmData);
         };
 
+        window.updateRMStatusFirebase = async function(rmId, newStatus) {
+            await update(ref(db, 'rms/' + rmId), { status: newStatus });
+        };
+
         window.saveObsToFirebase = async function(obsData) {
             await set(push(ref(db, 'observacoes')), { timestamp: Date.now(), ...obsData });
         };
 
         window.requestPrevisaoFirebase = async function(rmId, solicitanteCat) {
-            await set(push(ref(db, 'solicitacoes_previsao')), {
-                rmId: rmId, solicitante: solicitanteCat, timestamp: Date.now(), dateStr: new Date().toLocaleString('pt-BR')
-            });
+            await set(push(ref(db, 'solicitacoes_previsao')), { rmId: rmId, solicitante: solicitanteCat, timestamp: Date.now(), dateStr: new Date().toLocaleString('pt-BR') });
             alert("Aviso de cobrança enviado à administração do Almoxarifado.");
         };
 
@@ -838,9 +594,7 @@
         window.deleteRMFromFirebase = async function(rmId) {
             if(confirm(`Tem certeza que deseja apagar permanentemente a RM ${rmId}?`)) {
                 await remove(ref(db, 'rms/' + rmId));
-                window.observacoes.filter(o => o.rmId === rmId).forEach(async obs => {
-                    await remove(ref(db, 'observacoes/' + obs.key));
-                });
+                window.observacoes.filter(o => o.rmId === rmId).forEach(async obs => { await remove(ref(db, 'observacoes/' + obs.key)); });
             }
         };
 
@@ -849,20 +603,20 @@
         };
     </script>
 
+    <!-- ENGINE LOGIC -->
     <script>
         let currentRole = "VIEWER"; 
         let currentCategoryFilter = null; 
+        let searchQueryGlobal = "";
+        let statusFilterGlobal = "";
 
         function enterAsViewer(categoria) {
             currentRole = "VIEWER"; currentCategoryFilter = categoria;
             document.body.classList.remove('admin-authenticated');
             document.getElementById('user-role-display').innerText = `LÍDER: ${categoria}`;
             document.getElementById('dash-context-subtitle').innerText = `TELEMETRIA OPERACIONAL: ${categoria}`;
-            
             const portal = document.getElementById('portal-screen');
-            portal.style.opacity = '0';
-            portal.style.visibility = 'hidden';
-            
+            portal.style.opacity = '0'; portal.style.visibility = 'hidden';
             updateUI();
         }
 
@@ -871,40 +625,80 @@
             document.body.classList.add('admin-authenticated');
             document.getElementById('user-role-display').innerText = "ROOT: ALMOXARIFADO";
             document.getElementById('dash-context-subtitle').innerText = "TELEMETRIA GLOBAL";
-            
             const portal = document.getElementById('portal-screen');
-            portal.style.opacity = '0';
-            portal.style.visibility = 'hidden';
-            
+            portal.style.opacity = '0'; portal.style.visibility = 'hidden';
             updateUI();
         }
 
         function exitToPortal() {
             const portal = document.getElementById('portal-screen');
-            portal.style.visibility = 'visible';
-            portal.style.opacity = '1';
-            
+            portal.style.visibility = 'visible'; portal.style.opacity = '1';
             closeForm(); showSection('dashboard');
         }
 
         function showSection(sectionId) {
             document.querySelectorAll('.section').forEach(sec => sec.classList.remove('active'));
             document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
-            
-            // Força um reflow para re-engatilhar a animação CSS (Compositor pipeline)
-            void document.getElementById(sectionId).offsetWidth;
-            
+            void document.getElementById(sectionId).offsetWidth; 
             document.getElementById(sectionId).classList.add('active');
             event.currentTarget.classList.add('active');
             updateUI();
         }
 
         function openCreateMode() { document.getElementById('rm-form-container').style.display = 'block'; }
-        
-        function closeForm() { 
-            document.getElementById('rm-form-container').style.display = 'none'; 
-            document.getElementById('rm-form').reset(); 
-            togglePendencias();
+        function closeForm() { document.getElementById('rm-form-container').style.display = 'none'; document.getElementById('rm-form').reset(); togglePendencias(); }
+
+        function applyFilters() {
+            searchQueryGlobal = document.getElementById('search-input').value.toLowerCase().trim();
+            statusFilterGlobal = document.getElementById('status-filter').value;
+            updateUI();
+        }
+
+        // UPGRADE 7.1: Serialização CSV + Excel Local ABI Fix
+        function exportFilteredDataToCSV() {
+            const dataPool = getFilteredDataPipeline();
+            if(dataPool.length === 0) { alert("Nenhum dado para exportar."); return; }
+
+            // \uFEFF = BOM (Byte Order Mark) garante que o MS Excel renderize UTF-8 (acentos) corretamente.
+            const BOM = "\uFEFF";
+            // Delimitador padrão do Excel Brasileiro é ponto-e-vírgula.
+            const separator = ";"; 
+            
+            const headers = [
+                "Nº da RM", "Descrição Técnica", "Núcleo", "Data de Emissão", 
+                "Solicitante", "Status Global", "OC Referência", "Comprador", 
+                "SLA de Previsão", "Pendências"
+            ];
+            
+            const csvRows = [];
+            csvRows.push(headers.join(separator));
+
+            // Função de escape para CSV: Se houver aspas, duplica. Envolve a string em aspas para proteger pontos e vírgulas.
+            const escapeCSV = (str) => {
+                if (str === null || str === undefined || str === '-') return '""';
+                let s = String(str).replace(/"/g, '""');
+                return `"${s}"`;
+            };
+
+            dataPool.forEach(r => {
+                const row = [
+                    escapeCSV(r.id), escapeCSV(r.descricao), escapeCSV(r.categoria),
+                    escapeCSV(r.data), escapeCSV(r.solicitante), escapeCSV(r.status || 'Pendente'),
+                    escapeCSV(r.oc), escapeCSV(r.comprador), escapeCSV(r.prev), escapeCSV(r.pendencias)
+                ];
+                csvRows.push(row.join(separator));
+            });
+
+            const csvString = BOM + csvRows.join("\n");
+            const blob = new Blob([csvString], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement("a");
+            const url = URL.createObjectURL(blob);
+            link.setAttribute("href", url);
+            link.setAttribute("download", `Exportacao_RMs_SISTEMA_${new Date().toISOString().split('T')[0]}.csv`);
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
         }
 
         function getCatClass(cat) {
@@ -915,43 +709,47 @@
             return 'cat-badge'; 
         }
 
+        // UPGRADE 7.1: Novo status OC Parcial inserido na Lógica de Render
         function getStatusHtml(status) {
             let cl = 'status-pendente';
+            if(status === 'OC Parcial') cl = 'status-oc-parcial';
             if(status === 'OC Emitida') cl = 'status-oc';
             if(status === 'Entregue Parcialmente') cl = 'status-parcial';
             if(status === 'Entregue') cl = 'status-entregue';
             return `<span class="${cl}"><span class="status-dot"></span>${status}</span>`;
         }
 
+        function inlineStatusUpdate(selectElement, rmId) {
+            const newStatus = selectElement.value;
+            if(newStatus === 'Entregue Parcialmente') {
+                alert("Para status 'Entregue Parcialmente', por favor utilize o botão de Edição para registrar as pendências detalhadamente.");
+                selectElement.value = selectElement.dataset.original; 
+                window.triggerEditRM(rmId);
+                return;
+            }
+            if(window.updateRMStatusFirebase) {
+                selectElement.dataset.original = newStatus;
+                window.updateRMStatusFirebase(rmId, newStatus);
+            }
+        }
+
         function togglePendencias() {
             const status = document.getElementById('rm-status').value;
             const container = document.getElementById('pendencias-container');
-            if(status === 'Entregue Parcialmente') {
-                container.style.display = 'block';
-            } else {
-                container.style.display = 'none';
-                document.getElementById('rm-pendencias').value = '';
-            }
+            if(status === 'Entregue Parcialmente') { container.style.display = 'block'; } else { container.style.display = 'none'; document.getElementById('rm-pendencias').value = ''; }
         }
 
         function getSlaHtml(prevDate, status) {
             if(!prevDate || prevDate === '-') return '<span style="color:var(--text-muted); font-weight:700; font-family:var(--font-mono);">—</span>';
-            
-            if (typeof prevDate !== 'string' || !prevDate.includes('-')) {
-                return `<span style="color:var(--text-muted); font-weight:700; font-family:var(--font-mono);">${prevDate}</span>`;
-            }
-
+            if (typeof prevDate !== 'string' || !prevDate.includes('-')) return `<span style="color:var(--text-muted); font-weight:700; font-family:var(--font-mono);">${prevDate}</span>`;
             const prevParts = prevDate.split('-');
             if (prevParts.length < 3) return `<span style="color:var(--text-muted); font-weight:700; font-family:var(--font-mono);">${prevDate}</span>`;
             
             const formattedDate = `${prevParts[2]}/${prevParts[1]}/${prevParts[0]}`;
             if(status === 'Entregue') return `<span style="color:var(--text-muted); text-decoration: line-through; font-weight:700; font-family:var(--font-mono);">${formattedDate}</span>`;
             
-            const hoje = new Date();
-            hoje.setHours(0,0,0,0);
-            const dataPrev = new Date(prevParts[0], prevParts[1] - 1, prevParts[2]);
-            dataPrev.setHours(0,0,0,0);
-            
+            const hoje = new Date(); hoje.setHours(0,0,0,0);
+            const dataPrev = new Date(prevParts[0], prevParts[1] - 1, prevParts[2]); dataPrev.setHours(0,0,0,0);
             const diffTime = dataPrev - hoje;
             const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
@@ -960,18 +758,12 @@
             return `<span class="sla-badge sla-ok">${formattedDate} (OK)</span>`;
         }
 
-        function requestPrev(rmId) {
-            if(window.requestPrevisaoFirebase) window.requestPrevisaoFirebase(rmId, currentCategoryFilter);
-        }
-
-        function resolveReq(reqKey) {
-            if(window.resolvePrevisaoFirebase) window.resolvePrevisaoFirebase(reqKey);
-        }
+        function requestPrev(rmId) { if(window.requestPrevisaoFirebase) window.requestPrevisaoFirebase(rmId, currentCategoryFilter); }
+        function resolveReq(reqKey) { if(window.resolvePrevisaoFirebase) window.resolvePrevisaoFirebase(reqKey); }
 
         function saveRM(e) {
             e.preventDefault();
             const urlInput = document.getElementById('rm-anexo-url').value.trim();
-            
             const rmData = {
                 id: document.getElementById('rm-id').value.trim(),
                 descricao: document.getElementById('rm-descricao').value.trim(), 
@@ -985,50 +777,75 @@
                 pendencias: document.getElementById('rm-pendencias').value.trim() || '',
                 fileUrl: urlInput !== '' ? urlInput : null
             };
-            
-            if(window.saveRMToFirebase) {
-                window.saveRMToFirebase(rmData).then(() => {
-                    closeForm();
-                });
-            }
+            if(window.saveRMToFirebase) window.saveRMToFirebase(rmData).then(() => closeForm());
         }
 
         function saveObs(e) {
             e.preventDefault();
-            if(window.saveObsToFirebase) window.saveObsToFirebase({
-                date: new Date().toLocaleString('pt-BR'),
-                rmId: document.getElementById('obs-rm-select').value, text: document.getElementById('obs-text').value.trim()
-            });
+            if(window.saveObsToFirebase) window.saveObsToFirebase({ date: new Date().toLocaleString('pt-BR'), rmId: document.getElementById('obs-rm-select').value, text: document.getElementById('obs-text').value.trim() });
             document.getElementById('obs-form').reset();
         }
 
         function deleteRM(id) { if(window.deleteRMFromFirebase) window.deleteRMFromFirebase(id); }
         function deleteObs(key) { if(window.deleteObsFromFirebase) window.deleteObsFromFirebase(key); }
 
-        window.updateUI = function() {
-            const dataPool = window.rms || [];
-            const reqPool = window.solicitacoesPrev || [];
-
-            let filteredData = dataPool;
-            if (currentRole === "VIEWER" && currentCategoryFilter) {
-                filteredData = dataPool.filter(r => r.categoria === currentCategoryFilter);
+        function getFilteredDataPipeline() {
+            let dataPool = window.rms || [];
+            if (currentRole === "VIEWER" && currentCategoryFilter) dataPool = dataPool.filter(r => r.categoria === currentCategoryFilter);
+            if (searchQueryGlobal !== "") {
+                dataPool = dataPool.filter(r => 
+                    (r.id && r.id.toLowerCase().includes(searchQueryGlobal)) ||
+                    (r.descricao && r.descricao.toLowerCase().includes(searchQueryGlobal)) ||
+                    (r.solicitante && r.solicitante.toLowerCase().includes(searchQueryGlobal))
+                );
             }
+            if (statusFilterGlobal !== "") dataPool = dataPool.filter(r => (r.status || 'Pendente') === statusFilterGlobal);
+            return dataPool;
+        }
 
-            document.getElementById('kpi-total').innerText = filteredData.length;
-            document.getElementById('kpi-pendente').innerText = filteredData.filter(r => (r.status || 'Pendente') === 'Pendente').length;
-            document.getElementById('kpi-oc').innerText = filteredData.filter(r => r.status === 'OC Emitida' || r.status === 'Entregue Parcialmente').length;
-            document.getElementById('kpi-entregue').innerText = filteredData.filter(r => r.status === 'Entregue').length;
+        window.updateUI = function() {
+            const reqPool = window.solicitacoesPrev || [];
+            const filteredData = getFilteredDataPipeline(); 
+            
+            let baseKpiData = window.rms || [];
+            if (currentRole === "VIEWER" && currentCategoryFilter) baseKpiData = baseKpiData.filter(r => r.categoria === currentCategoryFilter);
+            
+            const countTotal = baseKpiData.length;
+            const countPendentes = baseKpiData.filter(r => (r.status || 'Pendente') === 'Pendente').length;
+            
+            // Agrega OC Parcial no pool central de OCs
+            const countOc = baseKpiData.filter(r => r.status === 'OC Emitida' || r.status === 'OC Parcial' || r.status === 'Entregue Parcialmente').length;
+            const countEntregue = baseKpiData.filter(r => r.status === 'Entregue').length;
+
+            document.getElementById('kpi-total').innerText = countTotal;
+            document.getElementById('kpi-pendente').innerText = countPendentes;
+            document.getElementById('kpi-oc').innerText = countOc;
+            document.getElementById('kpi-entregue').innerText = countEntregue;
+
+            const pipelineBar = document.getElementById('pipeline-bar');
+            if(countTotal > 0 && pipelineBar) {
+                const pctPen = (countPendentes / countTotal) * 100;
+                const pctOc = (countOc / countTotal) * 100;
+                const pctEnt = (countEntregue / countTotal) * 100;
+
+                pipelineBar.innerHTML = `
+                    <div class="pipeline-segment seg-pendente" style="width: ${pctPen}%"></div>
+                    <div class="pipeline-segment seg-oc" style="width: ${pctOc}%"></div>
+                    <div class="pipeline-segment seg-entregue" style="width: ${pctEnt}%"></div>
+                `;
+                document.getElementById('perc-pendente').innerText = Math.round(pctPen) + '%';
+                document.getElementById('perc-oc').innerText = Math.round(pctOc) + '%';
+                document.getElementById('perc-entregue').innerText = Math.round(pctEnt) + '%';
+            }
 
             const reqBadge = document.getElementById('req-count-badge');
             if(currentRole === "ADMIN" && reqPool.length > 0) {
-                reqBadge.innerText = reqPool.length;
-                reqBadge.style.display = 'inline-block';
-            } else {
-                reqBadge.style.display = 'none';
-            }
+                reqBadge.innerText = reqPool.length; reqBadge.style.display = 'inline-block';
+            } else { reqBadge.style.display = 'none'; }
 
             const tbody = document.getElementById('rm-table-body');
             tbody.innerHTML = '';
+            
             filteredData.forEach(rm => {
                 const descricao = rm.descricao || '—';
                 const categoria = rm.categoria || 'NÃO DEFINIDA';
@@ -1040,70 +857,63 @@
                 const pendencias = rm.pendencias || '';
                 
                 let dataEmissao = '—';
-                if (rm.data && typeof rm.data === 'string') {
-                    if (rm.data.includes('-')) {
-                        dataEmissao = rm.data.split('-').reverse().join('/');
-                    } else {
-                        dataEmissao = rm.data;
-                    }
-                } else if (rm.data) {
-                     dataEmissao = String(rm.data);
-                }
+                if (rm.data && typeof rm.data === 'string') dataEmissao = rm.data.includes('-') ? rm.data.split('-').reverse().join('/') : rm.data;
+                else if (rm.data) dataEmissao = String(rm.data);
 
                 let actionButtons = '';
+                let statusColHTML = '';
+                
                 if (currentRole === "ADMIN") {
                     actionButtons = `
-                        <button class="btn-action" onclick="window.triggerEditRM('${rm.id}')" title="Editar Documento">
+                        <button class="btn-action" onclick="window.triggerEditRM('${rm.id}')" title="Editar Documento Completo">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
                         </button>
                         <button class="btn-action btn-delete" onclick="deleteRM('${rm.id}')" title="Excluir Definitivamente">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2-2v2"></path></svg>
                         </button>
                     `;
-                } else if (status !== 'Entregue') {
-                    actionButtons = `
-                        <button class="btn-action btn-req" onclick="requestPrev('${rm.id}')" title="Emitir Ping Logístico para Administração">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
-                            Cobrar Previsão
-                        </button>
+                    
+                    statusColHTML = `
+                        <select class="inline-status-select" data-original="${status}" onchange="inlineStatusUpdate(this, '${rm.id}')" 
+                        style="color: ${status==='Pendente' ? 'var(--accent)' : status==='OC Emitida' ? 'var(--primary)' : status==='OC Parcial' ? 'var(--cyan)' : status==='Entregue' ? 'var(--success)' : 'var(--purple)'}">
+                            <option value="Pendente" ${status === 'Pendente' ? 'selected' : ''}>Pendente</option>
+                            <option value="OC Parcial" ${status === 'OC Parcial' ? 'selected' : ''}>OC Parcial</option>
+                            <option value="OC Emitida" ${status === 'OC Emitida' ? 'selected' : ''}>OC Emitida</option>
+                            <option value="Entregue Parcialmente" ${status === 'Entregue Parcialmente' ? 'selected' : ''}>Entreg. Parcial</option>
+                            <option value="Entregue" ${status === 'Entregue' ? 'selected' : ''}>Entregue</option>
+                        </select>
                     `;
+                } else {
+                    if (status !== 'Entregue') {
+                        actionButtons = `
+                            <button class="btn-action btn-req" onclick="requestPrev('${rm.id}')" title="Emitir Ping Logístico para Administração">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg> Cobrar
+                            </button>
+                        `;
+                    }
+                    statusColHTML = getStatusHtml(status);
+                }
+
+                if (status === 'Entregue Parcialmente' && pendencias) {
+                    statusColHTML += `<span class="pendencias-text">LOG: Faltam: ${pendencias}</span>`;
                 }
 
                 let anexoHtml = '<span style="color:var(--text-muted); opacity:0.4; font-family:var(--font-mono); font-weight:700;">NULL</span>';
                 if (rm.fileUrl) {
                     let href = (typeof rm.fileUrl === 'string' && rm.fileUrl.startsWith('http')) ? rm.fileUrl : '#';
-                    anexoHtml = `
-                        <a href="${href}" target="_blank" class="btn-action" style="color:var(--primary); border-color:rgba(14, 165, 233, 0.4);" title="Acessar Fonte Externa">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
-                            Planilha
-                        </a>
-                    `;
-                }
-
-                let statusColHTML = getStatusHtml(status);
-                if (status === 'Entregue Parcialmente' && pendencias) {
-                    statusColHTML += `<span class="pendencias-text">LOG: Faltam: ${pendencias}</span>`;
+                    anexoHtml = `<a href="${href}" target="_blank" class="btn-action" style="color:var(--primary); border-color:rgba(14, 165, 233, 0.4);"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg> Planilha</a>`;
                 }
 
                 let compradorUI = '<span style="color:var(--text-muted); opacity:0.4; font-family:var(--font-mono); font-weight:700;">AWAITING</span>';
-                if (comprador !== '-' && comprador !== '') {
-                    compradorUI = `<span style="font-weight:600; color:var(--text-bright); text-transform:uppercase;">${comprador}</span>`;
-                } else if (oc !== '-' && oc !== '—' && oc !== '') {
-                    compradorUI = `<span class="bot-tag" title="Sincronizado automaticamente via rotina de e-mail"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="11" width="18" height="10" rx="2"></rect><circle cx="12" cy="5" r="2"></circle><path d="M12 7v4"></path><line x1="8" y1="16" x2="8" y2="16"></line><line x1="16" y1="16" x2="16" y2="16"></line></svg> SYNC IA</span>`;
-                }
+                if (comprador !== '-' && comprador !== '') compradorUI = `<span style="font-weight:600; color:var(--text-bright); text-transform:uppercase;">${comprador}</span>`;
+                else if (oc !== '-' && oc !== '—' && oc !== '') compradorUI = `<span class="bot-tag"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="11" width="18" height="10" rx="2"></rect><circle cx="12" cy="5" r="2"></circle><path d="M12 7v4"></path><line x1="8" y1="16" x2="8" y2="16"></line><line x1="16" y1="16" x2="16" y2="16"></line></svg> SYNC IA</span>`;
 
                 tbody.innerHTML += `
                     <tr>
-                        <td class="data-highlight">${rm.id}</td>
-                        <td class="data-main">${descricao}</td>
-                        <td><span class="${getCatClass(categoria)}">${categoria}</span></td>
-                        <td class="data-mono" style="color:var(--text-muted)">${dataEmissao}</td>
-                        <td class="data-main">${solicitante}</td>
-                        <td>${statusColHTML}</td>
-                        <td class="data-mono" style="color:var(--text-bright);">${oc}</td>
-                        <td>${compradorUI}</td>
-                        <td>${getSlaHtml(prev, status)}</td>
-                        <td>${anexoHtml}</td>
+                        <td class="data-highlight">${rm.id}</td><td class="data-main">${descricao}</td>
+                        <td><span class="${getCatClass(categoria)}">${categoria}</span></td><td class="data-mono" style="color:var(--text-muted)">${dataEmissao}</td>
+                        <td class="data-main">${solicitante}</td><td>${statusColHTML}</td><td class="data-mono" style="color:var(--text-bright);">${oc}</td>
+                        <td>${compradorUI}</td><td>${getSlaHtml(prev, status)}</td><td>${anexoHtml}</td>
                         <td class="admin-only-cell"><div class="action-buttons-group">${actionButtons}</div></td>
                     </tr>
                 `;
@@ -1113,42 +923,21 @@
             if(reqTbody) {
                 reqTbody.innerHTML = '';
                 [...reqPool].reverse().forEach(req => {
-                    reqTbody.innerHTML += `
-                        <tr class="req-card">
-                            <td class="data-mono" style="font-size:0.85rem; color:var(--text-muted)">${req.dateStr}</td>
-                            <td class="data-highlight" style="color:var(--accent); text-shadow: var(--accent-glow); font-size:1.2rem;">${req.rmId}</td>
-                            <td><span class="${getCatClass(req.solicitante)}">${req.solicitante}</span></td>
-                            <td>
-                                <button class="btn-action" style="color:var(--success); border-color:var(--success); background: rgba(16,185,129,0.1);" onclick="resolveReq('${req.key}')">
-                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                                    Limpar Aviso
-                                </button>
-                            </td>
-                        </tr>
-                    `;
+                    reqTbody.innerHTML += `<tr class="req-card"><td class="data-mono" style="font-size:0.85rem; color:var(--text-muted)">${req.dateStr}</td><td class="data-highlight" style="color:var(--accent); text-shadow: var(--accent-glow); font-size:1.2rem;">${req.rmId}</td><td><span class="${getCatClass(req.solicitante)}">${req.solicitante}</span></td><td><button class="btn-action" style="color:var(--success); border-color:var(--success); background: rgba(16,185,129,0.1);" onclick="resolveReq('${req.key}')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg> Limpar Aviso</button></td></tr>`;
                 });
             }
 
             const select = document.getElementById('obs-rm-select');
             if(select) {
                 select.innerHTML = '<option value="">Vincular a uma RM raiz...</option>';
-                dataPool.forEach(rm => { select.innerHTML += `<option value="${rm.id}">ID: ${rm.id} [${rm.categoria || 'N/A'}]</option>`; });
+                (window.rms || []).forEach(rm => { select.innerHTML += `<option value="${rm.id}">ID: ${rm.id} [${rm.categoria || 'N/A'}]</option>`; });
             }
 
             const obsTbody = document.getElementById('obs-table-body');
             if(obsTbody && window.observacoes) {
                 obsTbody.innerHTML = '';
                 [...window.observacoes].reverse().forEach(o => {
-                    obsTbody.innerHTML += `
-                        <tr>
-                            <td class="data-mono" style="color: var(--text-muted); font-size: 0.85rem;">${o.date}</td>
-                            <td class="data-highlight">${o.rmId}</td>
-                            <td class="data-main" style="color:var(--text-muted)">${o.text}</td>
-                            <td class="admin-only-cell" style="text-align: left;">
-                                <button class="btn-action btn-delete" onclick="deleteObs('${o.key}')" title="Apagar Evento"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg></button>
-                            </td>
-                        </tr>
-                    `;
+                    obsTbody.innerHTML += `<tr><td class="data-mono" style="color: var(--text-muted); font-size: 0.85rem;">${o.date}</td><td class="data-highlight">${o.rmId}</td><td class="data-main" style="color:var(--text-muted)">${o.text}</td><td class="admin-only-cell" style="text-align: left;"><button class="btn-action btn-delete" onclick="deleteObs('${o.key}')" title="Apagar Evento"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg></button></td></tr>`;
                 });
             }
         }
@@ -1156,10 +945,7 @@
         window.triggerEditRM = function(id) {
             try {
                 const rm = (window.rms || []).find(r => String(r.id) === String(id));
-                if(!rm) {
-                    alert("Memory Fault: O sistema não conseguiu localizar o documento " + id + " no banco de dados ativo.");
-                    return;
-                }
+                if(!rm) { alert("Memory Fault: Documento " + id + " não localizado."); return; }
                 
                 openCreateMode();
                 document.getElementById('rm-id').value = rm.id || ''; 
@@ -1167,14 +953,7 @@
                 document.getElementById('rm-categoria').value = rm.categoria || 'MECÂNICA';
                 
                 let dataInput = '';
-                if (rm.data && typeof String(rm.data) === 'string' && rm.data !== '-' && rm.data !== '—') {
-                    let textData = String(rm.data);
-                    if (textData.includes('/')) {
-                        dataInput = textData.split('/').reverse().join('-');
-                    } else {
-                        dataInput = textData;
-                    }
-                }
+                if (rm.data && typeof String(rm.data) === 'string' && rm.data !== '-' && rm.data !== '—') dataInput = rm.data.includes('/') ? rm.data.split('/').reverse().join('-') : rm.data;
                 document.getElementById('rm-data').value = dataInput; 
 
                 document.getElementById('rm-solicitante').value = rm.solicitante || '';
@@ -1183,50 +962,24 @@
                 document.getElementById('rm-comprador').value = (!rm.comprador || rm.comprador === '-') ? '' : rm.comprador; 
                 
                 let prevInput = '';
-                if (rm.prev && typeof String(rm.prev) === 'string' && rm.prev !== '-' && rm.prev !== '—') {
-                    let textPrev = String(rm.prev);
-                    if (textPrev.includes('/')) {
-                        prevInput = textPrev.split('/').reverse().join('-');
-                    } else {
-                        prevInput = textPrev;
-                    }
-                }
+                if (rm.prev && typeof String(rm.prev) === 'string' && rm.prev !== '-' && rm.prev !== '—') prevInput = rm.prev.includes('/') ? rm.prev.split('/').reverse().join('-') : rm.prev;
                 document.getElementById('rm-prev').value = prevInput;
                 
                 document.getElementById('rm-pendencias').value = rm.pendencias || '';
                 togglePendencias();
-
                 document.getElementById('rm-anexo-url').value = rm.fileUrl ? rm.fileUrl : '';
-
                 window.scrollTo({ top: 0, behavior: 'smooth' });
-
-            } catch (error) {
-                console.error(error);
-                alert("Falha de Interface ao tentar abrir a edição. Log de erro: " + error.message);
-            }
+            } catch (error) { alert("Falha ao editar: " + error.message); }
         };
 
         window.syncInitialData = async function() {
             const hoje = new Date().toISOString().split('T')[0];
-            
             const initialRMs = [
                 { id: "337", descricao: "TUBULAÇÃO PRÉDIO INFL", categoria: "CIVIL", solicitante: "Thiago", status: "Pendente", fileUrl: "https://drive.google.com/open?id=1F3cRyRFmJObknw7SfUua8cggRCdJ8QcD7", data: hoje, oc: "-", comprador: "-", prev: "-" },
-                { id: "336", descricao: "ANDAIMES", categoria: "CIVIL", solicitante: "Thiago", status: "Pendente", fileUrl: "https://drive.google.com/open?id=1Bf4Qva4fgGal7mvpxy_JS55h21e_9N_Y6", data: hoje, oc: "-", comprador: "-", prev: "-" },
-                { id: "334", descricao: "Ferramentas Civil", categoria: "CIVIL", solicitante: "Thiago", status: "Pendente", fileUrl: "https://drive.google.com/open?id=1-iesxSnzgMzAS1vZ6V5ZtuDlOUkxnP_G5", data: hoje, oc: "-", comprador: "-", prev: "-" },
-                { id: "332", descricao: "ESTOQUE E APLICAÇÃO", categoria: "CIVIL", solicitante: "Thiago", status: "Pendente", fileUrl: "https://drive.google.com/open?id=1yWKD9UmFCiq6G0umL0VK5HhgqPnaFiRB4", data: hoje, oc: "-", comprador: "-", prev: "-" },
-                { id: "331", descricao: "COMPOUD", categoria: "CIVIL", solicitante: "Thiago", status: "Pendente", fileUrl: "https://drive.google.com/open?id=1Td7ogRLooudM52MNNkhnI8QWewiYhzZN3", data: hoje, oc: "-", comprador: "-", prev: "-" },
-                { id: "328", descricao: "GRAUTE EMERGENCIAL", categoria: "CIVIL", solicitante: "Thiago", status: "Pendente", fileUrl: "https://drive.google.com/open?id=1CI3ywqU46sD-MwSXOPdbils9no42NSTV2", data: hoje, oc: "-", comprador: "-", prev: "-" },
-                { id: "325", descricao: "MADEIRITE NAVAL", categoria: "CIVIL", solicitante: "Thiago", status: "Pendente", fileUrl: "https://drive.google.com/open?id=1Pzzw_ljiq2ruoU4-17emWqJb1cvTWckL1", data: hoje, oc: "-", comprador: "-", prev: "-" },
-                { id: "324", descricao: "ALUGUEL DE BOBCAT - ADM", categoria: "CIVIL", solicitante: "Thiago", status: "Pendente", fileUrl: "https://drive.google.com/open?id=1zjOaKgX28kGICRPj7pBd-7bjoWK-8aIQ", data: hoje, oc: "-", comprador: "-", prev: "-" },
-                { id: "323", descricao: "MATERIAL PARA ESGOTO INDUSTRIAL ÁREA NORTE", categoria: "CIVIL", solicitante: "Thiago", status: "Pendente", fileUrl: "https://drive.google.com/open?id=11N9_CdZxt4BDkFnvKzOyGYOqZWtK0vd3", data: hoje, oc: "-", comprador: "-", prev: "-" },
-                { id: "320", descricao: "MATERIAL PARA WCs - ADM", categoria: "CIVIL", solicitante: "Thiago", status: "Pendente", fileUrl: "https://drive.google.com/open?id=1kIXkZR9KifGUGPgwTYnKSJzGeffr9i9-", data: hoje, oc: "-", comprador: "-", prev: "-" },
-                { id: "313", descricao: "MATERIAL ABERTURA PORTAS GALPÃO", categoria: "CIVIL", solicitante: "Thiago", status: "Pendente", fileUrl: "https://drive.google.com/open?id=1i2hQWAlzD5-VNU7-ZpigCdBzMB55VN-A", data: hoje, oc: "-", comprador: "-", prev: "-" }
+                { id: "336", descricao: "ANDAIMES", categoria: "CIVIL", solicitante: "Thiago", status: "Pendente", fileUrl: "https://drive.google.com/open?id=1Bf4Qva4fgGal7mvpxy_JS55h21e_9N_Y6", data: hoje, oc: "-", comprador: "-", prev: "-" }
             ];
-
-            if(!confirm("Atenção: Rodar script de sincronização de banco de dados?\nSerão geradas requisições (I/O) no Firebase para RMs inexistentes ou com Drive desatualizado.")) return;
-
+            if(!confirm("Atenção: Rodar script de sincronização de banco de dados?")) return;
             let alteracoes = 0;
-
             for (const item of initialRMs) {
                 const existingRM = window.rms.find(r => String(r.id) === String(item.id));
                 if (!existingRM) {
@@ -1234,24 +987,13 @@
                     alteracoes++;
                 } else {
                     let changed = false;
-                    if (item.fileUrl.startsWith('http') && existingRM.fileUrl !== item.fileUrl) {
-                        existingRM.fileUrl = item.fileUrl;
-                        changed = true;
-                    }
-                    if (!existingRM.descricao) {
-                        existingRM.descricao = item.descricao;
-                        changed = true;
-                    }
-                    if (changed) {
-                        await window.saveRMToFirebase(existingRM);
-                        alteracoes++;
-                    }
+                    if (item.fileUrl.startsWith('http') && existingRM.fileUrl !== item.fileUrl) { existingRM.fileUrl = item.fileUrl; changed = true; }
+                    if (!existingRM.descricao) { existingRM.descricao = item.descricao; changed = true; }
+                    if (changed) { await window.saveRMToFirebase(existingRM); alteracoes++; }
                 }
             }
             alert(`Sincronização Finalizada. Mutação de DB: ${alteracoes} registros operados.`);
         }
-
-        window.updateUI();
     </script>
 </body>
 </html>
