@@ -9,21 +9,21 @@
         @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;800&display=swap');
 
         :root {
-            /* Palette Core - Dark Engineering */
-            --bg-base: #020617;
-            --bg-app: #090f1e;
-            --sidebar-bg: rgba(9, 15, 30, 0.85);
+            /* Palette Core - Dark Engineering (Ultra Clean) */
+            --bg-base: #020617; 
+            --bg-app: #0f172a; 
+            --sidebar-bg: rgba(2, 6, 23, 0.85);
             
-            /* Materiais e Superfícies */
+            /* Materiais e Superfícies (Specular Enhanced) */
             --surface-100: rgba(15, 23, 42, 0.4);
             --surface-200: rgba(30, 41, 59, 0.6);
             --surface-300: rgba(51, 65, 85, 0.5);
             
             /* Luzes */
-            --glass-border: rgba(255, 255, 255, 0.05);
-            --glass-highlight: rgba(255, 255, 255, 0.15);
-            --shadow-ambient: 0 10px 30px rgba(0, 0, 0, 0.5);
-            --shadow-contact: inset 0 1px 0 rgba(255, 255, 255, 0.05);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --glass-highlight: rgba(255, 255, 255, 0.25);
+            --shadow-ambient: 0 20px 40px rgba(0, 0, 0, 0.6);
+            --shadow-contact: inset 0 1px 1px rgba(255, 255, 255, 0.15);
             
             /* Emissive Lights (Status Colors) */
             --primary: #0ea5e9; /* OC Emitida */
@@ -35,12 +35,12 @@
             --danger: #ef4444; 
             --danger-glow: 0 0 20px rgba(239, 68, 68, 0.5);
             --purple: #8b5cf6; /* Entregue Parcialmente */
-            --cyan: #06b6d4; /* OC Parcial (NOVO STATUS) */
+            --cyan: #06b6d4; /* OC Parcial */
             --cyan-glow: 0 0 20px rgba(6, 182, 212, 0.5);
             
             /* Textos */
             --text-main: #f8fafc;
-            --text-muted: #64748b;
+            --text-muted: #94a3b8;
             --text-bright: #ffffff;
             --font-ui: 'Inter', system-ui, -apple-system, sans-serif;
             --font-mono: 'JetBrains Mono', monospace;
@@ -60,27 +60,33 @@
         * { box-sizing: border-box; margin: 0; padding: 0; }
 
         body {
-            background-color: var(--bg-base); color: var(--text-main); display: flex;
+            background-color: var(--bg-base); 
+            background-image: radial-gradient(circle at 50% 0%, #0f172a 0%, transparent 80%);
+            color: var(--text-main); display: flex;
             height: 100vh; overflow: hidden; font-family: var(--font-ui);
             -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; position: relative;
         }
 
-        body::after {
-            content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0;
-            background: url('data:image/svg+xml;utf8,<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"><filter id="noiseFilter"><feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="3" stitchTiles="stitch"/></filter><rect width="100%" height="100%" filter="url(%23noiseFilter)"/></svg>');
-            opacity: 0.015; pointer-events: none; z-index: 99999;
+        /* ENGINE ENVIRONMENT: PURE CLEAN VFX LAYERS */
+        .bg-grid {
+            position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+            background-image: radial-gradient(rgba(255, 255, 255, 0.06) 1px, transparent 1px);
+            background-size: 32px 32px; z-index: -3; pointer-events: none;
+            mask-image: radial-gradient(circle at center, black 30%, transparent 90%);
+            -webkit-mask-image: radial-gradient(circle at center, black 30%, transparent 90%);
         }
 
-        body::before {
-            content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0;
-            background-image: 
-                radial-gradient(circle at 50% -20%, rgba(14, 165, 233, 0.12), transparent 70%),
-                radial-gradient(circle at 100% 100%, rgba(139, 92, 246, 0.05), transparent 50%),
-                linear-gradient(rgba(255,255,255,0.015) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(255,255,255,0.015) 1px, transparent 1px);
-            background-size: 100% 100%, 100% 100%, 50px 50px, 50px 50px;
-            background-position: center top; z-index: -1; pointer-events: none; transform: translateZ(0); 
+        .vfx-ambient-orb {
+            position: absolute; border-radius: 50%; filter: blur(140px);
+            pointer-events: none; z-index: -2;
+            animation: orbFloat 25s ease-in-out infinite alternate;
+            will-change: transform; 
         }
+        .orb-1 { width: 50vw; height: 50vw; background: rgba(14, 165, 233, 0.12); top: -20vh; left: -10vw; animation-delay: 0s; }
+        .orb-2 { width: 60vw; height: 60vw; background: rgba(139, 92, 246, 0.12); bottom: -20vh; right: -10vw; animation-delay: -5s; }
+        .orb-3 { width: 40vw; height: 40vw; background: rgba(16, 185, 129, 0.08); top: 30vh; left: 40vw; animation-delay: -10s; }
+
+        @keyframes orbFloat { 0% { transform: translate(0, 0) scale(1); } 50% { transform: translate(5vw, 5vh) scale(1.05); } 100% { transform: translate(-5vw, 8vh) scale(0.95); } }
 
         .icon-svg { width: 18px; height: 18px; fill: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
 
@@ -95,32 +101,33 @@
 
         /* PORTAL */
         #portal-screen {
-            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(2, 6, 23, 0.90);
-            backdrop-filter: blur(30px); -webkit-backdrop-filter: blur(30px); z-index: 9999; display: flex; flex-direction: column;
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(2, 6, 23, 0.85);
+            backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); z-index: 9999; display: flex; flex-direction: column;
             align-items: center; justify-content: center; padding: 20px; transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.8s; perspective: 1200px;
         }
 
         .portal-header { text-align: center; margin-bottom: 70px; animation: slideDownFade 1s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
-        .portal-header h1 { font-size: 4.5rem; font-weight: 800; letter-spacing: 0.18em; background: linear-gradient(180deg, #ffffff 0%, #64748b 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 16px; text-transform: uppercase; filter: drop-shadow(0 10px 20px rgba(0,0,0,0.5)); line-height: 1.1; }
-        .portal-header p { color: var(--text-muted); font-family: var(--font-mono); font-size: 0.95rem; font-weight: 600; letter-spacing: 0.15em; text-transform: uppercase; background: rgba(15, 23, 42, 0.5); padding: 8px 20px; border-radius: 20px; border: 1px solid var(--glass-border); display: inline-block; }
+        .portal-header h1 { font-size: 4.5rem; font-weight: 800; letter-spacing: 0.18em; background: linear-gradient(180deg, #ffffff 0%, #94a3b8 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 16px; text-transform: uppercase; filter: drop-shadow(0 10px 30px rgba(0,0,0,0.8)); line-height: 1.1; }
+        .portal-header p { color: var(--text-muted); font-family: var(--font-mono); font-size: 0.95rem; font-weight: 600; letter-spacing: 0.15em; text-transform: uppercase; background: rgba(15, 23, 42, 0.8); padding: 8px 20px; border-radius: 20px; border: 1px solid var(--glass-border); display: inline-block; }
 
         .portal-grid { display: grid; grid-template-columns: repeat(2, minmax(320px, 400px)); gap: 32px; max-width: 900px; width: 100%; }
 
         .portal-card {
-            background: linear-gradient(180deg, rgba(30, 41, 59, 0.3) 0%, rgba(15, 23, 42, 0.8) 100%);
+            background: linear-gradient(180deg, rgba(30, 41, 59, 0.4) 0%, rgba(2, 6, 23, 0.9) 100%);
             border: 1px solid var(--glass-border); border-top: 2px solid transparent; border-radius: 16px; padding: 50px 30px;
             text-align: center; cursor: pointer; position: relative; overflow: hidden; display: flex; flex-direction: column; align-items: center; gap: 24px;
             box-shadow: var(--shadow-ambient), var(--shadow-contact); transition: var(--transition-heavy);
+            backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
             opacity: 0; transform: translateY(40px) scale(0.95); animation: cardEntrance 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
         }
         .portal-card:nth-child(1) { animation-delay: 0.1s; } .portal-card:nth-child(2) { animation-delay: 0.2s; }
         .portal-card:nth-child(3) { animation-delay: 0.3s; } .portal-card:nth-child(4) { animation-delay: 0.4s; }
 
-        .portal-card::before { content: ''; position: absolute; top: 0; left: -100%; width: 50%; height: 100%; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.03), transparent); transform: skewX(-20deg); transition: 0s; }
-        .portal-card:hover { transform: translateY(-10px) scale(1.02); background: linear-gradient(180deg, rgba(51, 65, 85, 0.4) 0%, rgba(15, 23, 42, 0.9) 100%); border-color: var(--glass-highlight); box-shadow: 0 30px 60px rgba(0,0,0,0.8), inset 0 2px 0 rgba(255,255,255,0.1); }
+        .portal-card::before { content: ''; position: absolute; top: 0; left: -100%; width: 50%; height: 100%; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.05), transparent); transform: skewX(-20deg); transition: 0s; }
+        .portal-card:hover { transform: translateY(-10px) scale(1.02); background: linear-gradient(180deg, rgba(51, 65, 85, 0.6) 0%, rgba(2, 6, 23, 0.95) 100%); border-color: var(--glass-highlight); box-shadow: 0 30px 60px rgba(0,0,0,0.9), inset 0 2px 2px rgba(255,255,255,0.15); }
         .portal-card:hover::before { left: 200%; transition: 1s cubic-bezier(0.16, 1, 0.3, 1); }
 
-        .portal-card .icon-box { width: 80px; height: 80px; border-radius: 20px; display: flex; align-items: center; justify-content: center; transition: var(--transition-heavy); background: rgba(2, 6, 23, 0.8); border: 1px solid var(--glass-border); box-shadow: inset 0 2px 10px rgba(0,0,0,0.5); }
+        .portal-card .icon-box { width: 80px; height: 80px; border-radius: 20px; display: flex; align-items: center; justify-content: center; transition: var(--transition-heavy); background: rgba(2, 6, 23, 0.9); border: 1px solid var(--glass-border); box-shadow: inset 0 2px 10px rgba(0,0,0,0.8), inset 0 1px 1px rgba(255,255,255,0.1); }
         .portal-card:hover .icon-box { transform: scale(1.15) translateY(-8px); }
         .portal-card .icon-box svg { width: 40px; height: 40px; stroke-width: 1.5; }
 
@@ -195,7 +202,13 @@
         .legend-item { display: flex; align-items: center; gap: 8px; color: var(--text-muted); }
         .legend-color { width: 12px; height: 12px; border-radius: 3px; }
 
-        .card { background: rgba(15, 23, 42, 0.6); border-radius: 16px; border: 1px solid var(--glass-border); padding: 35px; margin-bottom: 40px; backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); box-shadow: 0 20px 50px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.02); }
+        .card { 
+            background: linear-gradient(145deg, rgba(15, 23, 42, 0.7) 0%, rgba(5, 10, 21, 0.8) 100%); 
+            border-radius: 16px; border: 1px solid var(--glass-border); padding: 35px; margin-bottom: 40px; 
+            backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px); 
+            box-shadow: 0 30px 60px rgba(0,0,0,0.6), inset 0 1px 1px rgba(255,255,255,0.08); 
+            position: relative; z-index: 1;
+        }
         .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; padding-bottom: 20px; border-bottom: 1px solid var(--glass-border); flex-wrap: wrap; gap: 20px;}
         .card-header h3 { font-family: var(--font-mono); text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-muted); font-size: 1rem;}
 
@@ -227,6 +240,8 @@
         .btn-delete:hover { background: var(--danger); color: #fff; border-color: var(--danger); box-shadow: var(--danger-glow); }
         .btn-export { color: #fff; border-color: rgba(16, 185, 129, 0.5); background: linear-gradient(180deg, #10b981 0%, #059669 100%); box-shadow: 0 4px 15px rgba(16, 185, 129, 0.2); }
         .btn-export:hover { box-shadow: 0 8px 25px rgba(16, 185, 129, 0.4); border-color: #34d399;}
+        .btn-print { color: #fff; border-color: rgba(99, 102, 241, 0.5); background: linear-gradient(180deg, #6366f1 0%, #4f46e5 100%); box-shadow: 0 4px 15px rgba(99, 102, 241, 0.2); }
+        .btn-print:hover { box-shadow: 0 8px 25px rgba(99, 102, 241, 0.4); border-color: #818cf8; }
 
         /* Data Grid */
         .table-responsive { overflow-x: auto; border-radius: 12px; border: 1px solid var(--glass-border); background: rgba(2, 6, 23, 0.8); box-shadow: inset 0 5px 30px rgba(0,0,0,0.8); }
@@ -253,7 +268,7 @@
         .status-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 10px; box-shadow: 0 0 10px currentColor; }
         .status-pendente { color: var(--accent); font-weight: 700; text-shadow: 0 0 8px rgba(245,158,11,0.3); font-family: var(--font-mono); text-transform: uppercase; font-size:0.75rem;}
         .status-oc { color: var(--primary); font-weight: 700; text-shadow: 0 0 8px rgba(14,165,233,0.3); font-family: var(--font-mono); text-transform: uppercase; font-size:0.75rem;}
-        /* NOVO STATUS: OC PARCIAL */
+        
         .status-oc-parcial { color: var(--cyan); font-weight: 700; text-shadow: 0 0 8px rgba(6,182,212,0.3); font-family: var(--font-mono); text-transform: uppercase; font-size:0.75rem;}
         .status-oc-parcial .status-dot { background-color: var(--cyan); }
         
@@ -299,6 +314,28 @@
         @keyframes pulseGlow { 0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); } 70% { box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); } 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); } }
         @keyframes pulseGlowDanger { 0% { border-color: rgba(239, 68, 68, 0.4); box-shadow: 0 0 8px rgba(239, 68, 68, 0.3); } 50% { border-color: rgba(239, 68, 68, 0.9); box-shadow: 0 0 20px rgba(239, 68, 68, 0.6); } 100% { border-color: rgba(239, 68, 68, 0.4); box-shadow: 0 0 8px rgba(239, 68, 68, 0.3); } }
 
+        /* UPGRADE: NATIVE PDF/PRINT PIPELINE (Ink & Paper Mode) */
+        @media print {
+            body, .main-content { background: #ffffff !important; color: #000000 !important; overflow: visible !important; height: auto !important; padding: 0 !important; }
+            /* Hiding Engine VFX and UI Overlays */
+            .sidebar, .filters-toolbar, .pipeline-visualizer, .kpi-container, .watermark-global, .card-header .btn, #portal-screen, #rm-form-container { display: none !important; }
+            .bg-grid, .vfx-ambient-orb { display: none !important; }
+            /* Flatten Cards */
+            .card { box-shadow: none !important; border: none !important; margin: 0 !important; padding: 0 !important; backdrop-filter: none !important; background: transparent !important; }
+            .section-title { color: #000000 !important; text-shadow: none !important; margin-top: 20px; font-size: 24pt; border-bottom: 2px solid #000; padding-bottom: 10px;}
+            .section-subtitle { color: #333333 !important; }
+            /* Table Formatting for Paper */
+            table { width: 100% !important; border-collapse: collapse !important; font-size: 10pt !important; }
+            th { background-color: #e2e8f0 !important; color: #000000 !important; border: 1px solid #000000 !important; -webkit-print-color-adjust: exact; padding: 8px !important; }
+            td { border: 1px solid #000000 !important; color: #000000 !important; page-break-inside: avoid; padding: 6px !important; }
+            /* Clean up glowing badges for printer ink */
+            .cat-badge, .status-pendente, .status-oc, .status-oc-parcial, .status-parcial, .status-entregue, .sla-badge, .inline-status-select { 
+                background: transparent !important; border: none !important; color: #000000 !important; text-shadow: none !important; box-shadow: none !important; font-weight: bold !important; -webkit-appearance: none; appearance: none;
+            }
+            .status-dot { display: none !important; }
+            .admin-only-cell, .action-buttons-group { display: none !important; }
+        }
+
         @media (max-width: 1024px) {
             body { flex-direction: column; }
             .sidebar { width: 100%; height: auto; flex-direction: row; flex-wrap: wrap; align-items: center; padding: 0; border-right: none; border-bottom: 1px solid var(--glass-border);}
@@ -315,7 +352,13 @@
 </head>
 <body>
 
-    <div class="watermark-global">ENG. SAMUEL VITOR M. SANTOS <span>//</span> ARCHITECTURE & SYSTEMS v7.1</div>
+    <!-- CLEAN ROOM VFX PIPELINE -->
+    <div class="bg-grid"></div>
+    <div class="vfx-ambient-orb orb-1"></div>
+    <div class="vfx-ambient-orb orb-2"></div>
+    <div class="vfx-ambient-orb orb-3"></div>
+
+    <div class="watermark-global">ENG. SAMUEL VITOR M. SANTOS <span>//</span> ARCHITECTURE & SYSTEMS v7.4</div>
 
     <div id="portal-screen">
         <div class="portal-header">
@@ -362,7 +405,7 @@
                 <button class="nav-btn admin-only-block" onclick="showSection('solicitacoes')"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg> Alertas de Previsão <span id="req-count-badge" class="req-alert-badge">0</span></button>
             </div>
         </div>
-        <div class="sidebar-footer">v7.1 ENGINE BUILD (DATA/UX)</div>
+        <div class="sidebar-footer">v7.4 ENGINE BUILD (PRINT/XLS DATA)</div>
     </div>
 
     <div class="main-content">
@@ -396,9 +439,15 @@
                 <div class="card-header">
                     <h3>Registros Ativos em Banco</h3>
                     <div style="display: flex; gap: 16px; flex-wrap: wrap;">
-                        <button class="btn btn-export" onclick="exportFilteredDataToCSV()">
+                        <!-- UPGRADE 7.4: Gerador Visual de Relatórios em PDF -->
+                        <button class="btn btn-print" onclick="window.print()">
+                            <svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
+                            Gerar Relatório (PDF)
+                        </button>
+                        <!-- UPGRADE 7.4: Novo Exportador Excel Nativo (XLS HTML Table) -->
+                        <button class="btn btn-export" onclick="exportToExcelHTML()">
                             <svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-                            Exportar Excel (.CSV)
+                            Exportar Tabela (Excel)
                         </button>
                         <button class="btn btn-secondary admin-only btn-sync" onclick="syncInitialData()">
                             <svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 2v6h-6"></path><path d="M3 12a9 9 0 0 1 15-6.7L21 8"></path><path d="M3 22v-6h6"></path><path d="M21 12a9 9 0 0 1-15 6.7L3 16"></path></svg>
@@ -654,48 +703,68 @@
             updateUI();
         }
 
-        // UPGRADE 7.1: Serialização CSV + Excel Local ABI Fix
-        function exportFilteredDataToCSV() {
+        // UPGRADE 7.4: Engine de Serialização de Tabela HTML para Excel Nativo (Metadados + Paddings)
+        function exportToExcelHTML() {
             const dataPool = getFilteredDataPipeline();
             if(dataPool.length === 0) { alert("Nenhum dado para exportar."); return; }
 
-            // \uFEFF = BOM (Byte Order Mark) garante que o MS Excel renderize UTF-8 (acentos) corretamente.
-            const BOM = "\uFEFF";
-            // Delimitador padrão do Excel Brasileiro é ponto-e-vírgula.
-            const separator = ";"; 
-            
-            const headers = [
-                "Nº da RM", "Descrição Técnica", "Núcleo", "Data de Emissão", 
-                "Solicitante", "Status Global", "OC Referência", "Comprador", 
-                "SLA de Previsão", "Pendências"
-            ];
-            
-            const csvRows = [];
-            csvRows.push(headers.join(separator));
-
-            // Função de escape para CSV: Se houver aspas, duplica. Envolve a string em aspas para proteger pontos e vírgulas.
-            const escapeCSV = (str) => {
-                if (str === null || str === undefined || str === '-') return '""';
-                let s = String(str).replace(/"/g, '""');
-                return `"${s}"`;
-            };
+            let tableHTML = `
+            <html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">
+            <head>
+                <meta charset="utf-8">
+                <style>
+                    table { border-collapse: collapse; width: 100%; font-family: 'Segoe UI', Arial, sans-serif; }
+                    th { background-color: #0f172a; color: #ffffff; font-weight: bold; padding: 12px; text-align: left; border: 1px solid #cbd5e1; }
+                    td { padding: 10px; border: 1px solid #cbd5e1; vertical-align: middle; font-size: 14px; }
+                </style>
+            </head>
+            <body>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Nº da RM</th><th>Descrição Técnica</th><th>Núcleo</th><th>Data de Emissão</th>
+                            <th>Solicitante</th><th>Status Global</th><th>OC Referência</th><th>Comprador</th>
+                            <th>SLA de Previsão</th><th>Pendências</th>
+                        </tr>
+                    </thead>
+                    <tbody>`;
 
             dataPool.forEach(r => {
-                const row = [
-                    escapeCSV(r.id), escapeCSV(r.descricao), escapeCSV(r.categoria),
-                    escapeCSV(r.data), escapeCSV(r.solicitante), escapeCSV(r.status || 'Pendente'),
-                    escapeCSV(r.oc), escapeCSV(r.comprador), escapeCSV(r.prev), escapeCSV(r.pendencias)
-                ];
-                csvRows.push(row.join(separator));
+                let dataEmissao = r.data || '';
+                if (dataEmissao && typeof dataEmissao === 'string' && dataEmissao.includes('-')) dataEmissao = dataEmissao.split('-').reverse().join('/');
+                
+                let prev = r.prev || '';
+                if (prev && typeof prev === 'string' && prev.includes('-')) prev = prev.split('-').reverse().join('/');
+
+                let statusColor = '#f59e0b'; // Pendente
+                if(r.status === 'OC Emitida') statusColor = '#0ea5e9';
+                else if(r.status === 'OC Parcial') statusColor = '#06b6d4';
+                else if(r.status === 'Entregue Parcialmente') statusColor = '#8b5cf6';
+                else if(r.status === 'Entregue') statusColor = '#10b981';
+
+                tableHTML += `
+                    <tr>
+                        <td style="font-weight:bold; color:#0ea5e9;">${r.id || ''}</td>
+                        <td>${r.descricao || ''}</td>
+                        <td>${r.categoria || ''}</td>
+                        <td>${dataEmissao}</td>
+                        <td>${r.solicitante || ''}</td>
+                        <td style="font-weight:bold; color:${statusColor};">${r.status || 'Pendente'}</td>
+                        <td style="mso-number-format:'\@';">${r.oc || ''}</td>
+                        <td>${r.comprador || ''}</td>
+                        <td>${prev}</td>
+                        <td>${r.pendencias || ''}</td>
+                    </tr>`;
             });
 
-            const csvString = BOM + csvRows.join("\n");
-            const blob = new Blob([csvString], { type: 'text/csv;charset=utf-8;' });
-            const link = document.createElement("a");
+            tableHTML += `</tbody></table></body></html>`;
+
+            // Envelopamos a string HTML dentro de um arquivo Excel e entregamos via Blob
+            const blob = new Blob([tableHTML], { type: 'application/vnd.ms-excel' });
             const url = URL.createObjectURL(blob);
-            link.setAttribute("href", url);
-            link.setAttribute("download", `Exportacao_RMs_SISTEMA_${new Date().toISOString().split('T')[0]}.csv`);
-            link.style.visibility = 'hidden';
+            const link = document.createElement("a");
+            link.href = url;
+            link.download = `Relatorio_Estruturado_RMs_${new Date().toISOString().split('T')[0]}.xls`;
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
@@ -709,7 +778,6 @@
             return 'cat-badge'; 
         }
 
-        // UPGRADE 7.1: Novo status OC Parcial inserido na Lógica de Render
         function getStatusHtml(status) {
             let cl = 'status-pendente';
             if(status === 'OC Parcial') cl = 'status-oc-parcial';
@@ -813,7 +881,6 @@
             const countTotal = baseKpiData.length;
             const countPendentes = baseKpiData.filter(r => (r.status || 'Pendente') === 'Pendente').length;
             
-            // Agrega OC Parcial no pool central de OCs
             const countOc = baseKpiData.filter(r => r.status === 'OC Emitida' || r.status === 'OC Parcial' || r.status === 'Entregue Parcialmente').length;
             const countEntregue = baseKpiData.filter(r => r.status === 'Entregue').length;
 
@@ -869,7 +936,7 @@
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
                         </button>
                         <button class="btn-action btn-delete" onclick="deleteRM('${rm.id}')" title="Excluir Definitivamente">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2-2v2"></path></svg>
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
                         </button>
                     `;
                     
@@ -976,9 +1043,18 @@
             const hoje = new Date().toISOString().split('T')[0];
             const initialRMs = [
                 { id: "337", descricao: "TUBULAÇÃO PRÉDIO INFL", categoria: "CIVIL", solicitante: "Thiago", status: "Pendente", fileUrl: "https://drive.google.com/open?id=1F3cRyRFmJObknw7SfUua8cggRCdJ8QcD7", data: hoje, oc: "-", comprador: "-", prev: "-" },
-                { id: "336", descricao: "ANDAIMES", categoria: "CIVIL", solicitante: "Thiago", status: "Pendente", fileUrl: "https://drive.google.com/open?id=1Bf4Qva4fgGal7mvpxy_JS55h21e_9N_Y6", data: hoje, oc: "-", comprador: "-", prev: "-" }
+                { id: "336", descricao: "ANDAIMES", categoria: "CIVIL", solicitante: "Thiago", status: "Pendente", fileUrl: "https://drive.google.com/open?id=1Bf4Qva4fgGal7mvpxy_JS55h21e_9N_Y6", data: hoje, oc: "-", comprador: "-", prev: "-" },
+                { id: "334", descricao: "Ferramentas Civil", categoria: "CIVIL", solicitante: "Thiago", status: "Pendente", fileUrl: "https://drive.google.com/open?id=1-iesxSnzgMzAS1vZ6V5ZtuDlOUkxnP_G5", data: hoje, oc: "-", comprador: "-", prev: "-" },
+                { id: "332", descricao: "ESTOQUE E APLICAÇÃO", categoria: "CIVIL", solicitante: "Thiago", status: "Pendente", fileUrl: "https://drive.google.com/open?id=1yWKD9UmFCiq6G0umL0VK5HhgqPnaFiRB4", data: hoje, oc: "-", comprador: "-", prev: "-" },
+                { id: "331", descricao: "COMPOUD", categoria: "CIVIL", solicitante: "Thiago", status: "Pendente", fileUrl: "https://drive.google.com/open?id=1Td7ogRLooudM52MNNkhnI8QWewiYhzZN3", data: hoje, oc: "-", comprador: "-", prev: "-" },
+                { id: "328", descricao: "GRAUTE EMERGENCIAL", categoria: "CIVIL", solicitante: "Thiago", status: "Pendente", fileUrl: "https://drive.google.com/open?id=1CI3ywqU46sD-MwSXOPdbils9no42NSTV2", data: hoje, oc: "-", comprador: "-", prev: "-" },
+                { id: "325", descricao: "MADEIRITE NAVAL", categoria: "CIVIL", solicitante: "Thiago", status: "Pendente", fileUrl: "https://drive.google.com/open?id=1Pzzw_ljiq2ruoU4-17emWqJb1cvTWckL1", data: hoje, oc: "-", comprador: "-", prev: "-" },
+                { id: "324", descricao: "ALUGUEL DE BOBCAT - ADM", categoria: "CIVIL", solicitante: "Thiago", status: "Pendente", fileUrl: "https://drive.google.com/open?id=1zjOaKgX28kGICRPj7pBd-7bjoWK-8aIQ", data: hoje, oc: "-", comprador: "-", prev: "-" },
+                { id: "323", descricao: "MATERIAL PARA ESGOTO INDUSTRIAL ÁREA NORTE", categoria: "CIVIL", solicitante: "Thiago", status: "Pendente", fileUrl: "https://drive.google.com/open?id=11N9_CdZxt4BDkFnvKzOyGYOqZWtK0vd3", data: hoje, oc: "-", comprador: "-", prev: "-" },
+                { id: "320", descricao: "MATERIAL PARA WCs - ADM", categoria: "CIVIL", solicitante: "Thiago", status: "Pendente", fileUrl: "https://drive.google.com/open?id=1kIXkZR9KifGUGPgwTYnKSJzGeffr9i9-", data: hoje, oc: "-", comprador: "-", prev: "-" },
+                { id: "313", descricao: "MATERIAL ABERTURA PORTAS GALPÃO", categoria: "CIVIL", solicitante: "Thiago", status: "Pendente", fileUrl: "https://drive.google.com/open?id=1i2hQWAlzD5-VNU7-ZpigCdBzMB55VN-A", data: hoje, oc: "-", comprador: "-", prev: "-" }
             ];
-            if(!confirm("Atenção: Rodar script de sincronização de banco de dados?")) return;
+            if(!confirm("Atenção: Rodar script de sincronização de banco de dados?\nSerão geradas requisições (I/O) no Firebase para RMs inexistentes ou com Drive desatualizado.")) return;
             let alteracoes = 0;
             for (const item of initialRMs) {
                 const existingRM = window.rms.find(r => String(r.id) === String(item.id));
