@@ -358,7 +358,7 @@
     <div class="vfx-ambient-orb orb-2"></div>
     <div class="vfx-ambient-orb orb-3"></div>
 
-    <div class="watermark-global">ENG. SAMUEL VITOR M. SANTOS <span>//</span> ARCHITECTURE & SYSTEMS v7.4</div>
+    <div class="watermark-global">ENG. SAMUEL VITOR M. SANTOS <span>//</span> ARCHITECTURE & SYSTEMS v7.5</div>
 
     <div id="portal-screen">
         <div class="portal-header">
@@ -401,11 +401,11 @@
             <div class="sidebar-menu">
                 <button class="nav-btn active" onclick="showSection('dashboard')"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg> Painel Central</button>
                 <button class="nav-btn" onclick="showSection('rms')"><svg viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg> Espelho de RMs</button>
-                <button class="nav-btn admin-only-block" onclick="showSection('obs')"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg> Relatórios & Histórico</button>
+                <button class="nav-btn" onclick="showSection('obs')"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg> Relatórios & Histórico</button>
                 <button class="nav-btn admin-only-block" onclick="showSection('solicitacoes')"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg> Alertas de Previsão <span id="req-count-badge" class="req-alert-badge">0</span></button>
             </div>
         </div>
-        <div class="sidebar-footer">v7.4 ENGINE BUILD (PRINT/XLS DATA)</div>
+        <div class="sidebar-footer">v7.5 ENGINE BUILD (RBAC/DATA)</div>
     </div>
 
     <div class="main-content">
@@ -439,12 +439,10 @@
                 <div class="card-header">
                     <h3>Registros Ativos em Banco</h3>
                     <div style="display: flex; gap: 16px; flex-wrap: wrap;">
-                        <!-- UPGRADE 7.4: Gerador Visual de Relatórios em PDF -->
                         <button class="btn btn-print" onclick="window.print()">
                             <svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
                             Gerar Relatório (PDF)
                         </button>
-                        <!-- UPGRADE 7.4: Novo Exportador Excel Nativo (XLS HTML Table) -->
                         <button class="btn btn-export" onclick="exportToExcelHTML()">
                             <svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
                             Exportar Tabela (Excel)
@@ -559,7 +557,7 @@
             <h1 class="section-title">Auditoria de Observações</h1>
             <p class="section-subtitle">Log de eventos e pareceres técnicos atrelados</p>
             <div class="card">
-                <form id="obs-form" onsubmit="saveObs(event)" class="form-container">
+                <form id="obs-form" onsubmit="saveObs(event)" class="form-container admin-only-block">
                     <div class="form-grid">
                         <div class="form-group full-width"><label>Vínculo com Documento Raiz (RM)</label><select id="obs-rm-select" required></select></div>
                         <div class="form-group full-width"><label>Despacho Técnico / Parecer</label><textarea id="obs-text" rows="4" required></textarea></div>
@@ -703,7 +701,6 @@
             updateUI();
         }
 
-        // UPGRADE 7.4: Engine de Serialização de Tabela HTML para Excel Nativo (Metadados + Paddings)
         function exportToExcelHTML() {
             const dataPool = getFilteredDataPipeline();
             if(dataPool.length === 0) { alert("Nenhum dado para exportar."); return; }
@@ -759,7 +756,6 @@
 
             tableHTML += `</tbody></table></body></html>`;
 
-            // Envelopamos a string HTML dentro de um arquivo Excel e entregamos via Blob
             const blob = new Blob([tableHTML], { type: 'application/vnd.ms-excel' });
             const url = URL.createObjectURL(blob);
             const link = document.createElement("a");
@@ -1003,7 +999,15 @@
             const obsTbody = document.getElementById('obs-table-body');
             if(obsTbody && window.observacoes) {
                 obsTbody.innerHTML = '';
-                [...window.observacoes].reverse().forEach(o => {
+                
+                let obsPool = window.observacoes;
+                // ENGINE DE FILTRAGEM: O Líder (VIEWER) vê apenas notas de RMs da área dele
+                if (currentRole === "VIEWER" && currentCategoryFilter) {
+                    const validRmIds = (window.rms || []).filter(r => r.categoria === currentCategoryFilter).map(r => String(r.id));
+                    obsPool = obsPool.filter(o => validRmIds.includes(String(o.rmId)));
+                }
+
+                [...obsPool].reverse().forEach(o => {
                     obsTbody.innerHTML += `<tr><td class="data-mono" style="color: var(--text-muted); font-size: 0.85rem;">${o.date}</td><td class="data-highlight">${o.rmId}</td><td class="data-main" style="color:var(--text-muted)">${o.text}</td><td class="admin-only-cell" style="text-align: left;"><button class="btn-action btn-delete" onclick="deleteObs('${o.key}')" title="Apagar Evento"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg></button></td></tr>`;
                 });
             }
